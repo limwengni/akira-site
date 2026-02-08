@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
+/* --- UNIVERSAL CONFIG --- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #fdfdfd;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --text-dim: #999;
+  --accent-pro: #2563eb;
+  --accent-ant: #dc2626;
+  --border: #e2e2e5;
+
+  --font-display: var(--font-rubik), sans-serif;
+  --font-sub: var(--font-rubik), monospace;
+  --font-main: var(--font-rubik), sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    overflow-x: hidden;
+    /* Grid Pattern Background */
+    background-image: 
+        linear-gradient(rgba(0,0,0,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.015) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* --- SHARED LAYOUT ELEMENTS --- */
+.header-section {
+  padding: 60px 20px 40px;
+  text-align: center;
+  background: linear-gradient(
+        to bottom, 
+        var(--surface) 0%, 
+        var(--surface) 70%, 
+        transparent 100%
+    );
+}
+
+.header-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+
+.header-subtitle {
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* --- FOOTER --- */
+footer {
+  text-align: center;
+  padding: 60px 20px;
+  border-top: 1px solid var(--border);
+  background-color: var(--surface);
+}
+
+.footer-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  display: block;
+  margin-bottom: 15px;
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari/Chrome */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+  cursor: default;
+}
+
+.footer-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.copyright {
+  margin-top: 30px;
+  font-size: 0.6rem;
+  color: #ccc;
+  letter-spacing: 2px;
+}
+
+/* --- MOBILE ADJUSTMENTS --- */
+@media (max-width: 600px) {
+  .header-title {
+    font-size: 2rem;
+  }
 }

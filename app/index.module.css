@@ -1,0 +1,378 @@
+/* --- CONTAINER & GRID --- */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 5% 100px;
+}
+
+.archive-grid {
+    display: grid;
+    /* Grid Logic: Minimum width 280px, otherwise stretch */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px; /* Space between cards */
+}
+
+/* --- APP STYLE CARD LAYOUT (CLEAN VERSION) --- */
+
+.teyan-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); /* Softer shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f2f2f7;
+    height: 100%;
+}
+
+.teyan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+/* 1. BIG ART AREA */
+/* Container for the image and the floating icon */
+.img-wrap-container {
+    position: relative;
+    width: 100%;
+}
+
+.img-wrap {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Square Instagram style */
+    background-color: #f8f8f8;
+    overflow: hidden;
+    position: relative;
+}
+
+.img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.teyan-card:hover .img-wrap img {
+    transform: scale(1.03);
+}
+
+/* 2. META AREA */
+.card-meta {
+    padding: 15px 20px 20px; 
+    text-align: left;        /* Back to left-aligned text */
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 3. HEADER ROW */
+.meta-header {
+    display: flex;
+    flex-direction: column;
+    /* This creates the "gap" for the icon to sit in */
+    padding-left: 95px;      /* 80px icon width + 15px breathing room */
+    min-height: 45px;        /* Ensures space even if name is short */
+}
+
+/* Avatar Styling */
+.avatar-box {
+    position: absolute;
+    bottom: -40px;      /* Half of the 80px height */
+    left: 20px;         /* Pushed to the left side */
+    width: 80px;   
+    height: 80px;  
+    border-radius: 15px; 
+    overflow: hidden;
+    background: var(--surface);
+    border: 4px solid var(--surface); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 2;
+}
+
+.avatar-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Name Box */
+.name-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.char-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem; 
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #1d1d1f;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.char-role {
+	display: none; /* Hidden as per clean design */
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+}
+
+/* 4. QUOTE Styling */
+.char-quote {
+    font-size: 0.85rem;
+    color: #86868b;
+}
+
+.quote-mark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: serif;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.4;
+}
+
+/* --- FORM STYLES --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85); /* Matches your light theme */
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: var(--surface);
+    border: 2px solid var(--text);
+    padding: 40px;
+    width: 95%;
+    max-width: 800px; /* Increased from 400px */
+    max-height: 90vh;
+    overflow-y: auto; /* Scrollable if content is too tall */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.formDashboard {
+  display: flex;
+  gap: 30px;
+  margin: 20px 0;
+}
+
+.formSidebar {
+  flex: 1;
+  max-width: 250px;
+}
+
+.formMain {
+  flex: 2;
+}
+
+.formRow {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.dropZone {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border: 2px dashed var(--border);
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.dropZone img { width: 100%; height: 100%; object-fit: cover; }
+
+.dropZoneSmall {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed var(--border);
+  cursor: pointer;
+}
+
+.drop-zone:hover {
+    border-color: var(--accent-pro);
+    background: #f0f7ff;
+}
+
+.preview-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.preview-banner {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.modal-content h3 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--text);
+    display: inline-block;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    background: #fcfcfc;
+    transition: all 0.2s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent-pro);
+    background: var(--surface);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px;
+    font-family: var(--font-sub);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--text);
+    transition: all 0.2s ease;
+}
+
+/* Unlock / Save Button */
+.modal-actions button:first-child {
+    background: var(--text);
+    color: var(--surface);
+}
+
+.modal-actions button:first-child:hover {
+    background: var(--accent-pro);
+    border-color: var(--accent-pro);
+}
+
+/* Cancel / Close Button */
+.modal-actions button:last-child {
+    background: transparent;
+    color: var(--text-dim);
+    border-color: var(--border);
+}
+
+.modal-actions button:last-child:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+/* Floating Add Button for Admin */
+.add-floating-btn {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    background: var(--text);
+    color: var(--surface);;
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    z-index: 90;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.add-floating-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    background: var(--accent-pro);
+}
+
+/* Edit Icon on Cards */
+.edit-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    background: var(--text);
+    color: var(--surface);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1; 
+    visibility: visible;
+    transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: var(--accent-pro);
+    color: var(--surface);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- MOBILE ADJUSTMENTS --- */
+@media (max-width: 600px) {
+    .archive-grid {
+        grid-template-columns: 1fr; /* 1 card per row on phone */
+        gap: 20px;
+    }
+    
+    .teyan-card {
+        border-radius: 16px;
+    }
+}

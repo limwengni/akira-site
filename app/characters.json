@@ -1,0 +1,292 @@
+{
+  "shenglang": {
+    "icon": "characters/shenglang/icon.png",
+    "name": "SHENGLANG",
+    "role": "PROTAGONIST",
+    "subrole": "Deuteragonist",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Species": "Ascended Serpentine Deity",
+      "Age": "Unknown (~20s appearance)",
+      "Height": "188 cm",
+      "Birthday": "December 21",
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": "The Guardian Association"
+    },
+    "bio": "Originally a snake spirit from the Tao-Yuan realm, Shenglang spent eons honing his essence to achieve godhood. After ascending, he took on a human vessel and manifested in Zhong-Yuan under mysterious circumstances, where he was recruited by the Guardian Association. Though he appears human, his vessel is supernaturally durable, far exceeding the physical limits of any mortal. A cold and silent protector, he has formed a unique bond with Hikaru, who eventually designated December 21st as his 'birthday'—a concept Shenglang originally didn't understand, but has slowly come to accept as a symbol of his place in this world. The eyepatch over his left eye acts as a specialized limiter; it is a physical seal that, once removed, serves as a 'combat trigger'—allowing his raw, divine energy to flood his body and entering a state of absolute combat readiness.",
+    "abilities": "<b>Spirit Communion:</b> Shenglang can perceive and converse with spirits that are invisible to the human eye. He is accompanied by several high-level spirits who serve as his personal vanguard in battle.<br><br><b>Umbral Transmutation:</b> He possesses the power to condense wandering spirits into physical 'Shadow Monsters,' turning them into loyal soldiers for large-scale warfare.<br><br><b>Tactical Martial Mastery:</b> Eons of existence have granted him an encyclopedic knowledge of combat. He is a master of hand-to-hand styles and can dismantle armed opponents with ease by predicting their movements and exploiting their weaknesses.<br><br><b>The Unsealed Trigger:</b> By removing his eyepatch, Shenglang releases his divine limiters. In this state, his physical durability and spiritual output increase exponentially, allowing him to fight as a true deity.",
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "characters/shenglang/base.png"
+    ],
+    "relationships": "<b>Hikaru:</b> Partner / Close Associate. The only human who treats the deity with casual familiarity.<br><br><b>Unnamed Guardian:</b> An enigmatic contact from the Tao-Yuan realm with whom Shenglang shares a mysterious past.",
+    "trivias": "• His birthday was set on the Winter Solstice (Dec 21st) by Hikaru; it is the only day of the year Shenglang agrees to eat 'human food'—specifically Tangyuan.<br><br>• The taste of Tangyuan reportedly triggers a fleeting sense of nostalgia for his life in the Tao-Yuan realm, though he refuses to explain why.<br><br>• He is unusually sensitive to temperature changes; during the colder months of the Solstice, his movements become slower unless he is in his 'Unsealed' state.<br><br>• Retaining his nocturnal nature, he rarely sleeps during the night, often acting as a silent sentry while the rest of the team rests.<br><br>• He has a habit of watching the moon in total silence, often for hours without blinking.<br><br>• During extreme cold, he enters a state of 'semi-hibernation,' falling into a deep sleep that is nearly impossible to rouse from until he is provided with a heat source."
+  },
+  "hikaru": {
+    "icon": "characters/hikaru/icon.png",
+    "name": "HIKARU",
+    "role": "PROTAGONIST",
+    "subrole": "Main Protagonist",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Species": "Human (Enhanced)",
+      "Age": 23,
+      "Height": "175 cm",
+      "Birthday": "July 7th",
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": "The Guardian Association"
+    },
+    "bio": "As the primary protagonist and a key operative of the Guardian Association, Hikaru serves as the team's emotional anchor. Known for his boundless optimism and a stubborn streak, he faces even the most terrifying entities without flinching. When the ancient deity Shenglang was assigned to his unit, Hikaru ignored the god's cold refusal to socialize and immediately insisted on becoming his partner. He remains the only person brave enough to treat Shenglang like a normal human—even going as far as inventing a birthday for him to ensure the former spirit felt 'at home' in the mortal world.",
+    "abilities": "<b>God Speed (Shinsoku):</b> Hikaru possesses supernatural velocity, allowing him to move faster than the human eye can track. He utilizes this speed in tandem with his katana to deliver lethal, precision slashes before an enemy can even react.<br><br><b>Guardian's Fortitude:</b> Upon being appointed as a Guardian, his physical strength was magically enhanced. He possesses far greater longevity and durability than a normal human, allowing him to survive the intense physical strain of his high-speed combat style.",
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "characters/hikaru/base.png"
+    ],
+    "relationships": "<b>Shenglang:</b> Despite the deity's initial coldness, Hikaru insisted on a partnership and treats him like a normal human. He even designated Shenglang’s birthday as December 21st to help him feel at home.<br><br><b>Riku:</b> Their relationship is strained due to Riku's open discrimination toward Hikaru’s human origins. Riku resents Hikaru being chosen as a Guardian, believing that Hikaru’s \"God Speed\" lacks the raw power and durability of a Human-Demon Hybrid.",
+    "trivias": "• Hikaru is a childhood creation, having been drawn and developed by his creator for many years.<br><br>• His design originally featured black hair before being changed to his current golden-yellow look; his outfit is the only other element that has seen significant changes over time.<br><br>• He is the only individual with enough stubbornness to treat an ancient deity like Shenglang as an equal rather than a god."
+  },
+  "riku": {
+    "icon": "characters/riku/icon.png",
+    "name": "RIKU",
+    "role": "PROTAGONIST",
+    "subrole": "Main Protagonist",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Species": "Human-Demon Hybrid",
+      "Age": 24,
+      "Height": "182 cm",
+      "Birthday": "October 31st",
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": "The Guardian Association"
+    },
+    "bio": "A high-ranking operative of the Guardian Association and a rare Human-Fire Demon Hybrid. Riku is a pragmatist who values raw power and physical resilience above all else. He is known for his abrasive personality and has historically looked down on those he deems physically inferior, particularly pure humans. Despite his ego, he is a formidable combatant whose demonic heritage makes him one of the Association's most reliable 'tanks' in high-stakes warfare.",
+    "abilities": "<b>Demonic Resilience:</b> His hybrid physiology grants him supernatural durability. He can withstand physical trauma that would be fatal to a pure human, allowing him to act as the team's primary anchor.<br><br><b>Infernal Burst:</b> Riku can tap into his demonic blood to temporarily manifest the raw, overwhelming strength of a demon, delivering devastating physical blows.<br><br><b>Pyrokinesis:</b> As a fire demon hybrid, Riku can generate and manipulate intense flames. He focuses this heat into his hands, utilizing fire-enhanced fists to dominate in close combat and shatter enemy defenses.",
+    "relationships": "<b>Hikaru:</b> Complicated. Initially dismissed him for his human origins, though they are forced to work together as core members of the Association.<br><br><b>Shenglang:</b> Respectful. While Riku is often abrasive, he acknowledges Shenglang's divine status and combat prowess.",
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "characters/riku/base.png"
+    ]
+  },
+  "aslan": {
+    "icon": "characters/aslan/icon.png",
+    "name": "ASLAN",
+    "role": "PROTAGONIST",
+    "subrole": "Main Protagonist",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Species": "Beast-Kin",
+      "Age": 25,
+      "Height": "160 cm",
+      "Birthday": "August 14th",
+      "Status": 1,
+      "Dimension": "B",
+      "Affiliation": "Freelancer"
+    },
+    "bio": "A brilliant engineer originally hailing from the dimension of Xiu-Lu. In his home world, Aslan served as a lead researcher for a government technology organization, specializing in advanced robotics and high-scale mechanical engineering. Despite his intellect, he is notoriously stoic and rarely engages in social pleasantries, preferring the company of machines over people. He has shown no interest in romantic pursuits, dedicating his life entirely to his technical craft and the perfection of his autonomous systems.",
+    "abilities": "<b>Hyper-Intelligence:</b> Aslan possesses a genius-level IQ, allowing him to process complex data, hack advanced systems, and engineer solutions to physical problems in seconds.<br><br><b>Nano-Bot Mech Suit:</b> Aslan's primary combat tool is a specialized suit composed of millions of synchronized nano-bots. These bots can instantly materialize around his 160 cm frame, granting him superhuman strength, integrated weaponry, and flight capabilities while protecting his physical body from harm.",
+    "trivias": "• Despite his serious nature, he has a massive weakness for salty fish chips and is often seen snacking on them while working.<br><br>• He is the oldest member of the core group at 25, though his height often leads people to mistake him for being much younger.<br><br>• His nano-bots are programmed with a semi-autonomous AI that can perform basic repairs even when Aslan is unconscious.",
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "characters/aslan/base.png"
+    ]
+  },
+  "ashita": {
+    "icon": "characters/ashita/icon.png",
+    "name": "ASHITA KAZUMI",
+    "role": "ANTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1Ca_Z4yqMH_FyFngEOWxm_1WJacRejhGB"
+    ]
+  },
+  "cyrus": {
+    "icon": "characters/cyrus/icon.png",
+    "name": "CYRUS",
+    "role": "PROTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "B",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1hjSkrJTH9pA7sDHv5NRWcsJcGEeMfqJM"
+    ]
+  },
+  "mako": {
+    "icon": "characters/mako/icon.png",
+    "name": "MAKO",
+    "role": "PROTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Male (Merfolk)",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=17Li1D-E_3pV72Eo_89XjfLLIophSDXhn"
+    ]
+  },
+  "kai": {
+    "icon": "characters/kai/icon.png",
+    "name": "KAI",
+    "role": "PROTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "C",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1oKKpPDQw1ECE43Zg1vVxStIr0sEk6dYZ"
+    ]
+  },
+  "lucius": {
+    "icon": "characters/lucius/icon.png",
+    "name": "LUCIUS",
+    "role": "ANTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1t4lhREzf09j4GAi-4oa9usdwXCEKsZeC"
+    ]
+  },
+  "lotte": {
+    "icon": "characters/lotte/icon.png",
+    "name": "LOTTE",
+    "role": "PROTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Female",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1ZDZ5TF8mDW-_ZOPC7Mbpn8qf2gKJfKqd"
+    ]
+  },
+  "naomi": {
+    "icon": "characters/naomi/icon.png",
+    "name": "NAOMI",
+    "role": "ANTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Female",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1OuizBrn37GsTFL25A33clxzTG8p_ZnML"
+    ]
+  },
+  "otto": {
+    "icon": "characters/otto/icon.png",
+    "name": "OTTO",
+    "role": "PROTAGONIST",
+    "quote": null,
+    "stats": {
+      "Gender": "Male",
+      "Age": null,
+      "Height": null,
+      "Birthday": null,
+      "Status": 1,
+      "Dimension": "A",
+      "Affiliation": null
+    },
+    "bio": null,
+    "abilities": null,
+    "labels": [
+      "BASE"
+    ],
+    "gallery": [
+      "https://drive.google.com/thumbnail?id=1kN6w0xNm-MagKkMNQYNv_gemDeU4C9dl"
+    ]
+  }
+}
