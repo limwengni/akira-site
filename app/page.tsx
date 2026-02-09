@@ -2,139 +2,64 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
 import "./globals.css";
 import styles from "./index.module.css";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // Use this as visitor key for read access
-);
-
-const getRoleLabel = (roleId: any) => {
-  const roles: Record<number, string> = {
-    0: "UNCLASSIFIED",
-    1: "PROTAGONIST",
-    2: "ANTAGONIST",
-  };
-
-  // Convert to number to ensure it matches the keys
-  const id = Number(roleId);
-  return roles[id] || "UNCLASSIFIED";
-};
-
-export const SUB_ROLES = {
-  UNCLASSIFIED: 0,
-  PROTAGONIST: 1,
-  ANTAGONIST: 2,
-  DEUTERAGONIST: 3,
-  SUPPORTING: 4,
-  TRITAGONIST: 5,
-  MINOR: 6,
-} as const;
-
-const getSubRoleLabel = (roleId: number): string => {
-  const roles: Record<number, string> = {
-    [SUB_ROLES.UNCLASSIFIED]: "Unclassified",
-    [SUB_ROLES.PROTAGONIST]: "Protagonist",
-    [SUB_ROLES.ANTAGONIST]: "Antagonist",
-    [SUB_ROLES.DEUTERAGONIST]: "Deuteragonist",
-    [SUB_ROLES.SUPPORTING]: "Supporting",
-    [SUB_ROLES.TRITAGONIST]: "Tritagonist",
-    [SUB_ROLES.MINOR]: "Minor Character",
-  };
-
-  return roles[roleId];
-};
-
-const getStatusLabel = (roleId: number) => {
-  const roles: Record<string, string> = {
-    "0": "UNKNOWN",
-    "1": "ALIVE",
-    "2": "DECEASED",
-  };
-
-  const key = roleId !== null ? String(roleId) : "0";
-  return roles[key];
-};
+import { supabase } from "../src/lib/superbase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { getRoleLabel, getStatusLabel } from "../src/constants/character";
+import { authService } from "@/src/services/auth";
+import { characterService } from "@/src/services/character";
 
 export default function Home() {
-  // --- STATE ---
-  const [charList, setCharList] = useState<any[]>([]);
+  //#region --- States ---
+  const [loading, setLoading] = useState(true);
   const [clickCount, setClickCount] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [editingChar, setEditingChar] = useState<any>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
 
+  const [charList, setCharList] = useState<any[]>([]);
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
 
+  const [editingChar, setEditingChar] = useState<any>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  //#endregion
+
+  //#region --- Auth Function ---
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   // LOGIN FORM STATE
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
-
+    const { error } = await authService.login(email, password);
     if (error) {
-      alert("Login failed: " + error.message);
+      alert("Authentication failed: " + error.message);
     } else {
+      alert("Login successful!");
       setIsLoggedIn(true);
       setShowLogin(false);
+      window.location.reload();
     }
   };
 
-  // --- FETCH DATA ---
-  // Since we are no longer using "async function Home", we fetch data in useEffect
-  useEffect(() => {
-    const fetchOCs = async () => {
-      const { data, error } = await supabase
-        .from("characters")
-        .select("*")
-        .order("name", { ascending: true });
-
-      if (error) console.error("Error fetching OCs:", error);
-      else setCharList(data || []);
-    };
-    fetchOCs();
-  }, []);
-
-  // --- Handle login after refresh ---
-  useEffect(() => {
-    // 1. Fetch OCs
-    const fetchOCs = async () => {
-      const { data } = await supabase
-        .from("characters")
-        .select("*")
-        .order("name", { ascending: true });
-      setCharList(data || []);
-    };
-    fetchOCs();
-
-    // 2. Check if a user is already logged in
-    const checkUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) setIsLoggedIn(true);
-    };
-    checkUser();
-  }, []);
-
-  // --- LOGOUT HANDLER ---
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await authService.logout();
     if (error) {
-      alert("Error logging out: " + error.message);
+      alert("Logout failed: " + error.message);
     } else {
+      alert("Logout successful!");
       setIsLoggedIn(false);
-      alert("Admin logged out.");
+      window.location.reload();
     }
   };
+
+  const checkAuthStatus = async () => {
+    const user = await authService.getSession();
+    setIsLoggedIn(!!user);
+  };
+  //#endregion
 
   // --- HANDLERS ---
   const handleSecretClick = () => {
@@ -143,7 +68,7 @@ export default function Home() {
 
       if (nextCount === 3) {
         if (isLoggedIn) {
-          handleLogout();
+          setShowLogout(true);
         } else {
           setShowLogin(true);
         }
@@ -153,34 +78,66 @@ export default function Home() {
     });
   };
 
-  // Helper to upload to Supabase Storage
-  const uploadToStorage = async (
-    file: File,
-    folder: string,
-    type: "main" | "icon",
-  ) => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${type}-${Date.now()}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
+  // #region --- Load Function ---
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
 
-    const { error: uploadError } = await supabase.storage
-      .from("character-assets")
-      .upload(filePath, file, {
-        upsert: true, // This overwrites if the file path is identical
-      });
+      // Fetch Characters
+      const data = await characterService.fetchAllCharacters();
+      setCharList(data.data || []);
 
-    if (uploadError) throw uploadError;
-
-    const { data } = supabase.storage
-      .from("character-assets")
-      .getPublicUrl(filePath);
-    return data.publicUrl;
+      await checkAuthStatus();
+    } catch (err) {
+      console.error("Initialization failed:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
+    const isNew = !editingChar?.id;
+
+    const tempMainUrl = mainFile
+      ? URL.createObjectURL(mainFile)
+      : editingChar?.image_url;
+
+    const tempIconUrl = iconFile
+      ? URL.createObjectURL(iconFile)
+      : editingChar?.icon_url;
+
+    const optimisticChar = {
+      id: editingChar?.id || Date.now(), // Temporary ID for new items
+      ...editingChar, // Keep existing data (like ID)
+      name: data.name,
+      role: parseInt(data.role as string),
+      quote: data.quote,
+      image_url: tempMainUrl,
+      icon_url: tempIconUrl,
+    };
+
+    if (isNew) {
+      setCharList((prev) => [optimisticChar, ...prev]); // Add to top of list
+    } else {
+      setCharList((prev) =>
+        prev.map((c) => (c.id === editingChar.id ? optimisticChar : c)),
+      );
+    }
+
+    const tempEditingId = editingChar?.id; // Remember this for the DB call
+    setEditingChar(null);
+    setShowAddForm(false);
+
+    setMainFile(null);
+    setIconFile(null);
 
     try {
       // 1. Upload Images if they exist
@@ -193,9 +150,17 @@ export default function Home() {
         .replace(/\s+/g, "-");
 
       if (mainFile)
-        finalImageUrl = await uploadToStorage(mainFile, slug, "main");
+        finalImageUrl = await characterService.uploadImage(
+          mainFile,
+          slug,
+          "main",
+        );
       if (iconFile)
-        finalIconUrl = await uploadToStorage(iconFile, slug, "icon");
+        finalIconUrl = await characterService.uploadImage(
+          iconFile,
+          slug,
+          "icon",
+        );
 
       const charPayload = {
         name: data.name,
@@ -206,7 +171,7 @@ export default function Home() {
         slug: slug,
       };
 
-      const statsPayload = {
+      const rawStats = {
         age: data.age,
         gender: data.gender,
         height: data.height,
@@ -217,40 +182,45 @@ export default function Home() {
         status: 1,
       };
 
-      if (showAddForm) {
-        // Save New OC
-        const { data: newChar, error: charErr } = await supabase
-          .from("characters")
-          .insert([charPayload])
-          .select()
-          .single();
-        if (charErr) throw charErr;
+      const statsPayload = Object.fromEntries(
+        Object.entries(rawStats).filter(([_, v]) => v != null && v !== ""),
+      );
 
-        const { error: statsErr } = await supabase
-          .from("stats")
-          .insert([{ character_id: newChar.id, ...statsPayload }]);
-        if (statsErr) throw statsErr;
-      } else {
-        // Update Existing OC
-        const { error: charErr } = await supabase
-          .from("characters")
-          .update(charPayload)
-          .eq("id", editingChar.id);
-        if (charErr) throw charErr;
+      await characterService.save(
+        charPayload,
+        statsPayload,
+        isNew ? null : tempEditingId,
+      );
 
-        const { error: statsErr } = await supabase
-          .from("stats")
-          .update(statsPayload)
-          .eq("character_id", editingChar.id);
-        if (statsErr) throw statsErr;
+      const freshData = await characterService.fetchAllCharacters();
+      if (freshData.data) {
+        setCharList(freshData.data);
       }
 
-      alert("ARCHIVE_UPDATED_SUCCESSFULLY");
-      window.location.reload();
+      console.log("Background sync complete.");
     } catch (err: any) {
-      alert("CRITICAL_SYNC_ERROR: " + err.message);
+      console.error("Sync failed", err);
+      alert("Critical Sync Error: " + err.message + ". The page will reload.");
+      window.location.reload();
     }
   };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("CONFIRM_DELETION?")) return;
+
+    const originalList = [...charList];
+    setCharList((prev) => prev.filter((c) => c.id !== id));
+
+    try {
+      await characterService.delete(id);
+      console.log("Character deleted successfully.");
+    } catch (err: any) {
+      console.error("Deletion failed:", err);
+      alert("Deletion Error: " + err.message);
+      setCharList(originalList); // Revert UI
+    }
+  };
+  //#endregion
 
   return (
     <>
@@ -266,13 +236,22 @@ export default function Home() {
             <div key={char.id} className={styles["teyan-card"]}>
               {/* EDIT ICON - Only visible when logged in */}
               {isLoggedIn && (
-                <button
-                  className={styles["edit-btn"]}
-                  onClick={() => setEditingChar(char)}
-                  title="Edit Character"
-                >
-                  ✎
-                </button>
+                <div className={styles["action-stack"]}>
+                  <button
+                    className={styles["edit-btn"]}
+                    onClick={() => setEditingChar(char)}
+                    title="Edit Character"
+                  >
+                    <FontAwesomeIcon icon={faEdit} />
+                  </button>
+                  <button
+                    className={styles["delete-btn"]}
+                    onClick={() => handleDelete(char.id)}
+                    title="Delete Character"
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </button>
+                </div>
               )}
 
               <div className={styles["img-wrap-container"]}>
@@ -361,6 +340,38 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation */}
+      {showLogout && (
+        <div className={styles["modal-overlay"]}>
+          <div className={styles["modal-content"]}>
+            <h3>CONFIRM LOGOUT</h3>
+            <p>ARE YOU SURE YOU WANT TO LOGOUT?</p>
+            <div className={styles["modal-actions"]}>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setShowLogout(false);
+                }}
+              >
+                CONFIRM
+              </button>
+              <button type="button" onClick={() => setShowLogout(false)}>
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loaderBox}>
+            <div className={styles.spinner}></div>
+            <p>SYNCHRONIZING_WITH_ARCHIVE...</p>
           </div>
         </div>
       )}

@@ -331,33 +331,112 @@
     background: var(--accent-pro);
 }
 
-/* Edit Icon on Cards */
-.edit-btn {
+/* The container that holds both buttons */
+.action-stack {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 20;
-    background: var(--text);
-    color: var(--surface);
-    border: none;
-    width: 40px;
-    height: 40px;
+    display: flex;
+    flex-direction: column; /* Stack them vertically */
+    gap: 10px; /* Space between buttons */
+}
+
+/* Shared shape for both buttons */
+.action-btn {
+    width: 35px; /* Slightly smaller looks cleaner for stacks */
+    height: 35px;
     border-radius: 50%;
-    font-family: var(--font-display);
-    font-size: 1.2rem;
+    border: none;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 1; 
-    visibility: visible;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: all 0.2s ease;
+    opacity: 0; /* Hidden by default */
+    transform: translateX(10px);
+}
+
+/* 2. Shared Shape Logic (Apply to both) */
+.edit-btn,
+.delete-btn {
+  width: 40px;  /* Fixed Width */
+  height: 40px; /* Fixed Height (Must match width) */
+  border-radius: 50%; /* Makes it a circle */
+  
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;     /* Center icon vertically */
+  justify-content: center; /* Center icon horizontally */
+  
+  font-size: 1.1rem; /* Adjust icon size */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* Shadow makes them pop */
+  transition: all 0.2s ease;
+}
+
+/* 3. Edit Button Colors */
+.edit-btn {
+  background: var(--text); /* Black */
+  color: var(--surface);   /* White */
 }
 
 .edit-btn:hover {
-    background: var(--accent-pro);
-    color: var(--surface);
+  background: #333;
+  transform: scale(1.1);
+}
+
+/* 4. Delete Button Colors */
+.delete-btn {
+  background: var(--text);
+  color: var(--surface);
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+  color: #ffffff; /* Turns Red with White Text */
+  transform: scale(1.1);
+}
+
+.loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Higher than everything else */
+    color: var(--accent-pro);
+    font-family: var(--font-display);
+    letter-spacing: 2px;
+}
+
+.loaderBox {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--accent-pro);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 @keyframes fadeIn {
