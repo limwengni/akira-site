@@ -9,19 +9,46 @@ export const characterService = {
   },
 
   async uploadImage(file: File, folder: string, type: "main" | "icon") {
+    // A. CLEANUP: Find and delete any existing file of this type
+    // List all files in the character's folder
+    const { data: existingFiles } = await supabase.storage
+      .from("character-assets")
+      .list(folder);
+
+    if (existingFiles && existingFiles.length > 0) {
+      // Find files that start with "main-" or "icon-"
+      const filesToDelete = existingFiles
+        .filter((f) => f.name.startsWith(`${type}-`))
+        .map((f) => `${folder}/${f.name}`); // Construct full path
+
+      if (filesToDelete.length > 0) {
+        console.log(`🗑️ DELETING ONLY '${type}' FILES:`, filesToDelete);
+
+        const { error: removeError } = await supabase.storage
+          .from("character-assets")
+          .remove(filesToDelete);
+
+        if (removeError) console.error("Remove failed:", removeError);
+      } else {
+        console.log(`✅ No old '${type}' images found to delete. Safe.`);
+      }
+    }
+
+    // B. UPLOAD: Now upload the new one
     const fileExt = file.name.split(".").pop();
     const fileName = `${type}-${Date.now()}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
     const { error } = await supabase.storage
       .from("character-assets")
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file);
 
     if (error) throw error;
 
     const { data } = supabase.storage
       .from("character-assets")
       .getPublicUrl(filePath);
+
     return data.publicUrl;
   },
 
@@ -67,17 +94,20 @@ export const characterService = {
     }
   },
 
-  async delete(id: number) {
-    const { error: statsErr } = await supabase
-      .from("stats")
-      .delete()
-      .eq("character_id", id);
-    if (statsErr) throw statsErr;
+  async delete(id: number, slug: string) {
+    const { data: list } = await supabase.storage
+      .from("character-assets")
+      .list(slug); // List everything inside the 'slug' folder
 
-    const { error: charErr } = await supabase
-      .from("characters")
-      .delete()
-      .eq("id", id);
-    if (charErr) throw charErr;
-  }
+    if (list && list.length > 0) {
+      const filesToRemove = list.map((x) => `${slug}/${x.name}`);
+      await supabase.storage.from("character-assets").remove(filesToRemove);
+    }
+
+    // 2. Delete from Database
+    // Because of "Cascade", deleting the Character automatically deletes their Stats!
+    const { error } = await supabase.from("characters").delete().eq("id", id);
+
+    if (error) throw error;
+  },
 };

@@ -18,12 +18,12 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    background: var(--surface);;
+    background: var(--surface);
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06); /* Softer shadow */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #f2f2f7;
+    border: 1px solid #e1e1e6;
     height: 100%;
 }
 
@@ -42,7 +42,7 @@
 .img-wrap {
     display: block;
     width: 100%;
-    aspect-ratio: 1 / 1; /* Square Instagram style */
+    aspect-ratio: 4 / 5;
     background-color: #f8f8f8;
     overflow: hidden;
     position: relative;
@@ -53,6 +53,7 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
+    object-position: top center;
 }
 
 .teyan-card:hover .img-wrap img {
@@ -212,6 +213,17 @@
   height: 80px;
   border: 2px dashed var(--border);
   cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropZoneSmall img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .drop-zone:hover {
@@ -219,18 +231,74 @@
     background: #f0f7ff;
 }
 
-.preview-img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border: 1px solid var(--border);
+.cropperModal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.preview-banner {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-    border: 1px solid var(--border);
+.cropperContainer {
+  position: relative;
+  width: 90%;
+  height: 60%; /* Adjusts how big the crop area is */
+  background: #333;
+}
+
+.cropperControls {
+  margin-top: 20px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cropperButtons {
+  display: flex;
+  gap: 15px; /* Space between buttons */
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.btnCancel {
+  background-color: #ff4d4f; /* Red */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btnCancel:hover {
+  background-color: #d9363e;
+}
+
+.btnSave {
+  background-color: #52c41a; /* Green */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btnSave:hover {
+  background-color: #389e0d;
+}
+
+/* Make the slider look decent */
+.sliderContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-weight: bold;
 }
 
 .modal-content form {

@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import Cropper, { Area } from "react-easy-crop";
 import "./globals.css";
 import styles from "./index.module.css";
-import { supabase } from "../src/lib/superbase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { getRoleLabel, getStatusLabel } from "../src/constants/character";
 import { authService } from "@/src/services/auth";
 import { characterService } from "@/src/services/character";
+import { getCroppedImg } from "@/src/utils/cropUtils";
 
 export default function Home() {
   //#region --- States ---
@@ -22,6 +23,22 @@ export default function Home() {
 
   const [editingChar, setEditingChar] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  type Area = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [tempImgSrc, setTempImgSrc] = useState<string | null>(null);
+  const [editingTarget, setEditingTarget] = useState<"icon" | "main" | null>(
+    null,
+  );
   //#endregion
 
   //#region --- Auth Function ---
@@ -61,7 +78,7 @@ export default function Home() {
   };
   //#endregion
 
-  // --- HANDLERS ---
+  //#region --- HANDLERS ---
   const handleSecretClick = () => {
     setClickCount((prev) => {
       const nextCount = prev + 1;
@@ -77,6 +94,58 @@ export default function Home() {
       return nextCount;
     });
   };
+
+  const onFileSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "icon" | "main",
+  ) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const imageDataUrl = URL.createObjectURL(file);
+
+      setTempImgSrc(imageDataUrl);
+      setEditingTarget(type);
+      setCropperOpen(true);
+      setZoom(1); // Reset zoom
+    }
+  };
+
+  const showCroppedImage = async () => {
+    try {
+      if (!tempImgSrc || !croppedAreaPixels) return;
+
+      // Use our utility to get the blob
+      const croppedBlob = await getCroppedImg(tempImgSrc, croppedAreaPixels);
+
+      const fileName =
+        editingTarget === "icon" ? "cropped-icon.jpg" : "cropped-main.jpg";
+
+      // Convert Blob to File (Optional, but helps keep types consistent)
+      const croppedFile = new File([croppedBlob], fileName, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+
+      if (editingTarget === "icon") {
+        setIconFile(croppedFile);
+      } else {
+        setMainFile(croppedFile);
+      }
+
+      // Cleanup
+      setCropperOpen(false);
+      setTempImgSrc(null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const onCancel = () => {
+    setCropperOpen(false);
+    setTempImgSrc(null); // Clear the temp image so it doesn't linger
+    setEditingTarget(null);
+  };
+  //#endregion
 
   // #region --- Load Function ---
   const loadInitialData = async () => {
@@ -98,13 +167,22 @@ export default function Home() {
   useEffect(() => {
     loadInitialData();
   }, []);
+  //#endregion
 
+  //#region --- Save / Delete Handlers ---
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
     const isNew = !editingChar?.id;
+
+    let currentSlug = editingChar?.slug || "";
+
+    if (isNew) {
+      // New: Generate "ashita" from "Ashita Kazumi"
+      currentSlug = (data.name as string).trim().split(" ")[0].toLowerCase();
+    }
 
     const tempMainUrl = mainFile
       ? URL.createObjectURL(mainFile)
@@ -122,20 +200,21 @@ export default function Home() {
       quote: data.quote,
       image_url: tempMainUrl,
       icon_url: tempIconUrl,
+      slug: currentSlug,
     };
 
     if (isNew) {
       setCharList((prev) => [optimisticChar, ...prev]); // Add to top of list
     } else {
       setCharList((prev) =>
-        prev.map((c) => (c.id === editingChar.id ? optimisticChar : c)),
+        prev.map((c) => (c.id === editingChar!.id ? optimisticChar : c)),
       );
     }
 
     const tempEditingId = editingChar?.id; // Remember this for the DB call
+
     setEditingChar(null);
     setShowAddForm(false);
-
     setMainFile(null);
     setIconFile(null);
 
@@ -143,24 +222,32 @@ export default function Home() {
       // 1. Upload Images if they exist
       let finalImageUrl = editingChar?.image_url || "";
       let finalIconUrl = editingChar?.icon_url || "";
+      let uploadErrors: string[] = [];
 
-      const slug = (data.name as string)
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-");
-
-      if (mainFile)
-        finalImageUrl = await characterService.uploadImage(
-          mainFile,
-          slug,
-          "main",
-        );
-      if (iconFile)
-        finalIconUrl = await characterService.uploadImage(
-          iconFile,
-          slug,
-          "icon",
-        );
+      if (mainFile) {
+        try {
+          finalImageUrl = await characterService.uploadImage(
+            mainFile,
+            currentSlug,
+            "main",
+          );
+        } catch (err) {
+          console.error("Main image upload failed", err);
+          uploadErrors.push("Main Image");
+        }
+      }
+      if (iconFile) {
+        try {
+          finalIconUrl = await characterService.uploadImage(
+            iconFile,
+            currentSlug,
+            "icon",
+          );
+        } catch (err) {
+          console.error("Icon upload failed", err);
+          uploadErrors.push("Icon");
+        }
+      }
 
       const charPayload = {
         name: data.name,
@@ -168,7 +255,7 @@ export default function Home() {
         icon_url: finalIconUrl,
         quote: data.quote,
         role: parseInt(data.role as string),
-        slug: slug,
+        slug: currentSlug,
       };
 
       const rawStats = {
@@ -186,11 +273,25 @@ export default function Home() {
         Object.entries(rawStats).filter(([_, v]) => v != null && v !== ""),
       );
 
-      await characterService.save(
-        charPayload,
-        statsPayload,
-        isNew ? null : tempEditingId,
-      );
+      // Save to Database
+      try {
+        await characterService.save(
+          charPayload,
+          statsPayload,
+          isNew ? null : tempEditingId,
+        );
+
+        // FINAL USER FEEDBACK
+        if (uploadErrors.length > 0) {
+          alert(
+            `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
+          );
+        } else {
+          alert("Character saved successfully!");
+        }
+      } catch (dbError) {
+        alert("Failed to save character data. Please try again.");
+      }
 
       const freshData = await characterService.fetchAllCharacters();
       if (freshData.data) {
@@ -205,14 +306,15 @@ export default function Home() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number, slug: string) => {
     if (!confirm("CONFIRM_DELETION?")) return;
 
     const originalList = [...charList];
+
     setCharList((prev) => prev.filter((c) => c.id !== id));
 
     try {
-      await characterService.delete(id);
+      await characterService.delete(id, slug);
       console.log("Character deleted successfully.");
     } catch (err: any) {
       console.error("Deletion failed:", err);
@@ -246,7 +348,7 @@ export default function Home() {
                   </button>
                   <button
                     className={styles["delete-btn"]}
-                    onClick={() => handleDelete(char.id)}
+                    onClick={() => handleDelete(char.id, char.slug)}
                     title="Delete Character"
                   >
                     <FontAwesomeIcon icon={faXmark} />
@@ -259,7 +361,11 @@ export default function Home() {
                   href={`/profile/${char.slug}`}
                   className={styles["img-wrap"]}
                 >
-                  <img src={char.image_url} alt={char.name} loading="lazy" />
+                  <img
+                    src={`${char.image_url}?width=300&height=300&resize=cover`}
+                    alt={char.name}
+                    loading="lazy"
+                  />
                 </Link>
                 <div className={styles["avatar-box"]}>
                   <img src={char.icon_url || char.image_url} alt="icon" />
@@ -303,7 +409,6 @@ export default function Home() {
       </footer>
 
       {/* --- MODALS --- */}
-
       {/* Login Popup */}
       {showLogin && (
         <div className={styles["modal-overlay"]}>
@@ -376,6 +481,61 @@ export default function Home() {
         </div>
       )}
 
+      {/* Image Cropper Modal */}
+      {cropperOpen && tempImgSrc && (
+        <div className={styles.cropperModal}>
+          <div className={styles.cropperContainer}>
+            <Cropper
+              image={tempImgSrc}
+              crop={crop}
+              zoom={zoom}
+              // ICON = Force Square (1), MAIN = Free (2 / 3)
+              aspect={editingTarget === "icon" ? 1 : 2 / 3}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={(_, croppedPixels) =>
+                setCroppedAreaPixels(croppedPixels)
+              }
+            />
+          </div>
+
+          {/* CONTROLS */}
+          <div className={styles.cropperControls}>
+            <div className={styles.sliderContainer}>
+              <span>Zoom</span>
+              <input
+                type="range"
+                value={zoom}
+                min={1}
+                max={3}
+                step={0.1}
+                onChange={(e) => setZoom(Number(e.target.value))}
+              />
+            </div>
+
+            <div className={styles.cropperButtons}>
+              {/* RED CANCEL BUTTON */}
+              <button
+                type="button" // Important: preventing form submission
+                onClick={onCancel}
+                className={styles.btnCancel}
+              >
+                Cancel
+              </button>
+
+              {/* GREEN DONE BUTTON */}
+              <button
+                type="button"
+                onClick={showCroppedImage}
+                className={styles.btnSave}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit / Add Form */}
       {(editingChar || showAddForm) && (
         <div className={styles["modal-overlay"]}>
@@ -412,7 +572,7 @@ export default function Home() {
                       type="file"
                       id="mainFile"
                       hidden
-                      onChange={(e) => setMainFile(e.target.files?.[0] || null)}
+                      onChange={(e) => onFileSelect(e, "main")}
                     />
                     <span>CLICK_TO_UPLOAD</span>
                   </div>
@@ -434,7 +594,8 @@ export default function Home() {
                       type="file"
                       id="iconFile"
                       hidden
-                      onChange={(e) => setIconFile(e.target.files?.[0] || null)}
+                      accept="image/*"
+                      onChange={(e) => onFileSelect(e, "icon")}
                     />
                   </div>
                 </div>
@@ -536,6 +697,8 @@ export default function Home() {
                   onClick={() => {
                     setEditingChar(null);
                     setShowAddForm(false);
+                    setIconFile(null);
+                    setMainFile(null);
                   }}
                   className={styles.closeBtn}
                 >
