@@ -1,45 +1,46 @@
-export const SUB_ROLES = {
-  UNCLASSIFIED: 0,
-  PROTAGONIST: 1,
-  ANTAGONIST: 2,
-  DEUTERAGONIST: 3,
-  SUPPORTING: 4,
-  TRITAGONIST: 5,
-  MINOR: 6,
-} as const;
+// Get main role
+export const ROLE_MAP: Record<number, string> = {
+  0: "UNCLASSIFIED",
+  1: "PROTAGONIST",
+  2: "ANTAGONIST",
+};
 
-// Get main role 
 export const getRoleLabel = (roleId: number) => {
-  const roles: Record<number, string> = {
-    0: "UNCLASSIFIED",
-    1: "PROTAGONIST",
-    2: "ANTAGONIST",
-  };
+  return ROLE_MAP[roleId] || "UNCLASSIFIED";
+};
 
-  return roles[roleId] || "UNCLASSIFIED";
+export const SUB_ROLES_MAP: Record<number, string> = {
+  0: "UNCLASSIFIED",
+  1: "PROTAGONIST",
+  2: "ANTAGONIST",
+  3: "DEUTERAGONIST",
+  4: "SUPPORTING",
+  5: "TRITAGONIST",
+  6: "MINOR",
 };
 
 // Get sub role for profile page
 const getSubRoleLabel = (roleId: number): string => {
-  const roles: Record<number, string> = {
-    [SUB_ROLES.UNCLASSIFIED]: "Unclassified",
-    [SUB_ROLES.PROTAGONIST]: "Protagonist",
-    [SUB_ROLES.ANTAGONIST]: "Antagonist",
-    [SUB_ROLES.DEUTERAGONIST]: "Deuteragonist",
-    [SUB_ROLES.SUPPORTING]: "Supporting",
-    [SUB_ROLES.TRITAGONIST]: "Tritagonist",
-    [SUB_ROLES.MINOR]: "Minor Character",
-  };
+  return SUB_ROLES_MAP[roleId] || "UNCLASSIFIED";
+};
 
-  return roles[roleId] || "Unclassified";
+export const STATUS_MAP: Record<number, string> = {
+  0: "UNKNOWN",
+  1: "ALIVE",
+  2: "DECEASED",
+  3: "REINCARNATED",
 };
 
 export const getStatusLabel = (statusId: number) => {
-  const roles: Record<number, string> = {
-    0: "UNKNOWN",
-    1: "ALIVE",
-    2: "DECEASED",
-  };
-
-  return roles[statusId] || "UNKNOWN";
+  return STATUS_MAP[statusId] || "UNKNOWN";
 };
+
+// Get gender
+export const GENDER_MAP: Record<number, string> = {
+  0: "UNSPECIFIED",
+  1: "MALE",
+  2: "FEMALE",
+  3: "NON-BINARY",
+  4: "OTHER"
+};
+

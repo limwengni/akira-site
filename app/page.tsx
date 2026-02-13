@@ -7,15 +7,39 @@ import "./globals.css";
 import styles from "./index.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { getRoleLabel, getStatusLabel } from "../src/constants/character";
+import { GENDER_MAP, getRoleLabel, ROLE_MAP } from "../src/constants/character";
 import { authService } from "@/src/services/auth";
 import { characterService } from "@/src/services/character";
 import { getCroppedImg } from "@/src/utils/cropUtils";
+import { STATUS_MAP } from "@/src/constants/character";
+
+// --- Sub-components for Layout ---
+const MangaPanel = ({
+  title,
+  children,
+  dark = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  dark?: boolean;
+}) => (
+  <section
+    className={`${styles.mangaPanel} ${dark ? styles.panelDark : styles.panelLight}`}
+  >
+    <div
+      className={`${styles.panelHeader} ${dark ? styles.headerDark : styles.headerLight}`}
+    >
+      {title}
+    </div>
+    <div className={styles.panelContent}>{children}</div>
+  </section>
+);
 
 export default function Home() {
   //#region --- States ---
   const [loading, setLoading] = useState(true);
   const [clickCount, setClickCount] = useState(0);
+  const [isBlinking, setIsBlinking] = useState(true); // For sound effect
 
   const [charList, setCharList] = useState<any[]>([]);
   const [mainFile, setMainFile] = useState<File | null>(null);
@@ -167,6 +191,11 @@ export default function Home() {
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  useEffect(() => {
+    const blink = setInterval(() => setIsBlinking((b) => !b), 500);
+    return () => clearInterval(blink);
+  }, []);
   //#endregion
 
   //#region --- Save / Delete Handlers ---
@@ -258,15 +287,18 @@ export default function Home() {
         slug: currentSlug,
       };
 
+      // Format birthday to YYYY-MM-DD if possible (using dummy year 2000)
+      const birthday = `2000-${data.birth_month}-${data.birth_day}`;
+
       const rawStats = {
         age: data.age,
         gender: data.gender,
-        height: data.height,
+        height: data.height ? parseInt(data.height as string) : null, // Store as number only
         species: data.species,
-        birthday: data.birthday,
-        dimension: data.dimension,
-        affiliation: data.affiliation,
-        status: 1,
+        birthday: birthday,
+        // dimension: parseInt(data.dimension as string) || null,
+        // affiliation: parseInt(data.affiliation as string) || null,
+        status: parseInt(data.status as string) || 1,
       };
 
       const statsPayload = Object.fromEntries(
@@ -326,67 +358,194 @@ export default function Home() {
 
   return (
     <>
-      <header className="header-section">
-        <h1 className="header-title">AKIRA'S OC ARCHIVE</h1>
-        <p className="header-subtitle">WORLDBUILDING DATABASE</p>
-      </header>
+      <div className={styles.outerViewport}>
+        {/* The Centered Page Container */}
+        <div id="manga-page" className={styles.pageContainer}>
+          {/* Halftone Screentone Background */}
+          <div className={styles.halftoneBg}></div>
 
-      {/* Use styles.container here */}
-      <main className={styles.container}>
-        <div className={styles["archive-grid"]}>
-          {charList?.map((char) => (
-            <div key={char.id} className={styles["teyan-card"]}>
-              {/* EDIT ICON - Only visible when logged in */}
-              {isLoggedIn && (
-                <div className={styles["action-stack"]}>
-                  <button
-                    className={styles["edit-btn"]}
-                    onClick={() => setEditingChar(char)}
-                    title="Edit Character"
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button
-                    className={styles["delete-btn"]}
-                    onClick={() => handleDelete(char.id, char.slug)}
-                    title="Delete Character"
-                  >
-                    <FontAwesomeIcon icon={faXmark} />
-                  </button>
-                </div>
-              )}
-
-              <div className={styles["img-wrap-container"]}>
-                <Link
-                  href={`/profile/${char.slug}`}
-                  className={styles["img-wrap"]}
-                >
-                  <img
-                    src={`${char.image_url}?width=300&height=300&resize=cover`}
-                    alt={char.name}
-                    loading="lazy"
-                  />
-                </Link>
-                <div className={styles["avatar-box"]}>
-                  <img src={char.icon_url || char.image_url} alt="icon" />
-                </div>
+          {/* Content Wrapper */}
+          <div className={styles.contentWrapper}>
+            {/* Manga Title Banner */}
+            <header className={styles.mangaHeader}>
+              <div className={styles.volTag}>VOL. 01 // 2024</div>
+              <h1 className={styles.mangaTitle}>AKIRA'S SECRET BASEMENT</h1>
+              <div className={styles.headerDecor}>
+                <span className={styles.decorLine}></span>
+                <span className={styles.decorText}>Directory</span>
+                <span className={styles.decorLine}></span>
               </div>
+            </header>
 
-              <div className={styles["card-meta"]}>
-                <div className={styles["meta-header"]}>
-                  <div className={styles["name-box"]}>
-                    <h3 className={styles["char-name"]}>{char.name}</h3>
-                    <span className={styles["char-role"]} data-role={char.role}>
-                      {getRoleLabel(char.role)}
-                    </span>
+            {/* Main 2-Column Grid Layout */}
+            <main className={styles.mainGrid}>
+              {/* LEFT SIDE: Sidebar */}
+              <aside className={styles.sidebar}>
+                <MangaPanel title="CONTENTS" dark>
+                  <nav className={styles.navLinks}>
+                    {[
+                      "01. Introduction",
+                      "02. Protagonists",
+                      "03. The Rivals",
+                      "04. World Lore",
+                      "05. Archive",
+                    ].map((item) => (
+                      <a key={item} href="#" className={styles.navItem}>
+                        <span>{item}</span>
+                      </a>
+                    ))}
+                  </nav>
+                </MangaPanel>
+
+                <MangaPanel title="READER REACH">
+                  <div className={styles.statBox}>
+                    <div className={styles.statNumber}>{charList.length}</div>
+                    <div className={styles.statLabel}>Subjects Registered</div>
+                  </div>
+                </MangaPanel>
+
+                {/* Sound Effect */}
+                {/* <div
+                  className={`${styles.soundEffect} ${isBlinking ? styles.soundBlink : ""}`}
+                >
+                  ゴゴゴ
+                </div> */}
+              </aside>
+
+              {/* RIGHT SIDE: Character List */}
+              <section className={styles.mainContent}>
+                <div className={styles.pagePanel}>
+                  {/* Diagonal Overlay */}
+                  <div className={styles.diagonalOverlay}></div>
+
+                  {/* Page Header */}
+                  <h2 className={styles.pageHeader}>
+                    <span className={styles.pageTag}>PAGE 1</span>
+                    <span className={styles.chapterTag}>CHARACTERS</span>
+                  </h2>
+
+                  {/* Character Grid */}
+                  <div className={styles["archive-grid"]}>
+                    {charList?.map((char, index) => (
+                      <div key={char.id} className={styles.charEntryWrapper}>
+                        <div className={styles["teyan-card"]}>
+                          {/* EDIT ICON - Only visible when logged in */}
+                          {isLoggedIn && (
+                            <div className={styles["action-stack"]}>
+                              <button
+                                className={styles["edit-btn"]}
+                                onClick={() => setEditingChar(char)}
+                                title="Edit Character"
+                              >
+                                <FontAwesomeIcon icon={faEdit} />
+                              </button>
+                              <button
+                                className={styles["delete-btn"]}
+                                onClick={() => handleDelete(char.id, char.slug)}
+                                title="Delete Character"
+                              >
+                                <FontAwesomeIcon icon={faXmark} />
+                              </button>
+                            </div>
+                          )}
+
+                          <div className={styles["img-wrap-container"]}>
+                            <Link
+                              href={`/profile/${char.slug}`}
+                              className={styles["img-wrap"]}
+                            >
+                              <img
+                                src={`${char.image_url}?width=300&height=300&resize=cover`}
+                                alt={char.name}
+                                loading="lazy"
+                              />
+                            </Link>
+                            <div className={styles["avatar-box"]}>
+                              <img
+                                src={char.icon_url || char.image_url}
+                                alt="icon"
+                              />
+                            </div>
+                          </div>
+
+                          <div className={styles["card-meta"]}>
+                            <div className={styles["meta-header"]}>
+                              <div className={styles["name-box"]}>
+                                <h3 className={styles["char-name"]}>
+                                  {char.name}
+                                </h3>
+                                <span
+                                  className={
+                                    char.role === 1
+                                      ? styles["char-role-pro"]
+                                      : char.role === 2
+                                        ? styles["char-role-ant"]
+                                        : styles["char-role"]
+                                  }
+                                  data-role={char.role}
+                                >
+                                  {getRoleLabel(char.role)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className={styles["char-quote"]}>
+                              {char.quote}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Add dotted line separator except for last item */}
+                        {index < charList.length - 1 && (
+                          <div className={styles.dottedSeparator}></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination Footer */}
+                  <div className={styles.paginationFooter}>
+                    <button className={styles.pageBtn} disabled>
+                      ← NEXT
+                    </button>
+                    <div className={styles.pageNumbers}>
+                      <button
+                        className={`${styles.numBtn} ${styles.activeNum}`}
+                      >
+                        1
+                      </button>
+                    </div>
+                    <button className={styles.pageBtn} disabled>
+                      PREV →
+                    </button>
                   </div>
                 </div>
-                <div className={styles["char-quote"]}>{char.quote}</div>
+              </section>
+            </main>
+
+            {/* Footer Section */}
+            <footer className={styles.mangaFooter}>
+              <div className={styles.footerLeft}>
+                <div className={styles.theEnd}>THE END.</div>
+                <p className={styles.footerMeta} onClick={handleSecretClick}>
+                  AKIRA_CORE // © {new Date().getFullYear()}
+                </p>
               </div>
-            </div>
-          ))}
+              <div className={styles.footerRight}>
+                <div className={styles.footerBlocks}>
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`${styles.block} ${i === 0 ? styles.blockActive : ""}`}
+                    ></div>
+                  ))}
+                </div>
+                <div className={styles.copyrightTag}>
+                  Copyright © {new Date().getFullYear()} Akira
+                </div>
+              </div>
+            </footer>
+          </div>
         </div>
-      </main>
+      </div>
 
       {/* FLOATING ADD BUTTON */}
       {isLoggedIn && (
@@ -397,16 +556,6 @@ export default function Home() {
           +
         </button>
       )}
-
-      <footer>
-        <span className="footer-brand" onClick={handleSecretClick}>
-          AKIRA_CORE
-        </span>
-        <div className="footer-links">
-          <a href="https://akirachizu.carrd.co/">MAIN_SITE</a>
-        </div>
-        <p className="copyright">© {new Date().getFullYear()} AKIRA ARCHIVE</p>
-      </footer>
 
       {/* --- MODALS --- */}
       {/* Login Popup */}
@@ -546,8 +695,8 @@ export default function Home() {
             <header className={styles.modalHeader}>
               <h3>
                 {showAddForm
-                  ? "// INITIALIZING_NEW_ENTRY"
-                  : `// EDITING_SUBJECT: ${editingChar?.name}`}
+                  ? "// INITIALIZING NEW ENTRY"
+                  : `// EDITING SUBJECT: ${editingChar?.name}`}
               </h3>
             </header>
 
@@ -555,7 +704,7 @@ export default function Home() {
               <div className={styles.formDashboard}>
                 {/* LEFT COLUMN: VISUALS */}
                 <div className={styles.formSidebar}>
-                  <label className={styles.fieldLabel}>MAIN_SPLASH_ART</label>
+                  <label className={styles.fieldLabel}>MAIN SPLASH ART</label>
                   <div
                     className={styles.dropZone}
                     onClick={() => document.getElementById("mainFile")?.click()}
@@ -574,10 +723,10 @@ export default function Home() {
                       hidden
                       onChange={(e) => onFileSelect(e, "main")}
                     />
-                    <span>CLICK_TO_UPLOAD</span>
+                    <span>CLICK TO UPLOAD</span>
                   </div>
 
-                  <label className={styles.fieldLabel}>SYSTEM_ICON</label>
+                  <label className={styles.fieldLabel}>SYSTEM ICON</label>
                   <div
                     className={styles.dropZoneSmall}
                     onClick={() => document.getElementById("iconFile")?.click()}
@@ -604,7 +753,7 @@ export default function Home() {
                 <div className={styles.formMain}>
                   <div className={styles.formRow}>
                     <div style={{ flex: 2 }}>
-                      <label>SUBJECT_NAME</label>
+                      <label>SUBJECT NAME</label>
                       <input
                         name="name"
                         defaultValue={editingChar?.name}
@@ -613,20 +762,22 @@ export default function Home() {
                       />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <label>ROLE_DESIGNATION</label>
+                      <label>ROLE DESIGNATION</label>
                       <select
                         name="role"
                         defaultValue={editingChar?.role || "0"}
                         className={styles["input-field"]}
                       >
-                        <option value="0">UNCLASSIFIED</option>
-                        <option value="1">PROTAGONIST</option>
-                        <option value="2">ANTAGONIST</option>
+                        {Object.entries(ROLE_MAP).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
 
-                  <label>DESIGNATED_QUOTE</label>
+                  <label>DESIGNATED QUOTE</label>
                   <textarea
                     name="quote"
                     defaultValue={editingChar?.quote}
@@ -634,57 +785,147 @@ export default function Home() {
                     rows={2}
                   />
 
-                  {showAddForm && (
-                    <div className={styles.statsSection}>
-                      <h4 className={styles.sectionDivider}>
-                        VITAL_STATISTICS_INITIALIZATION
-                      </h4>
-                      <div className={styles.statsGrid}>
-                        <input
-                          name="age"
-                          placeholder="AGE"
-                          defaultValue={editingChar?.stats?.[0]?.age}
-                          className={styles["input-field"]}
-                        />
-                        <input
+                  <div className={styles.statsSection}>
+                    <h4 className={styles.sectionDivider}>
+                      VITAL STATISTICS INITIALIZATION
+                    </h4>
+                    <div className={styles.statsGrid}>
+                      <div>
+                        <label>GENDER</label>
+                        <select
                           name="gender"
-                          placeholder="GENDER"
-                          defaultValue={editingChar?.stats?.[0]?.gender}
+                          defaultValue={editingChar?.stats?.[0]?.gender ?? "1"}
                           className={styles["input-field"]}
-                        />
-                        <input
-                          name="height"
-                          placeholder="HEIGHT"
-                          defaultValue={editingChar?.stats?.[0]?.height}
-                          className={styles["input-field"]}
-                        />
+                        >
+                          {Object.entries(GENDER_MAP).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label>SPECIES</label>
                         <input
                           name="species"
-                          placeholder="SPECIES"
                           defaultValue={editingChar?.stats?.[0]?.species}
                           className={styles["input-field"]}
                         />
+                      </div>
+                      <div>
+                        <label>AGE</label>
                         <input
-                          name="birthday"
-                          placeholder="BIRTHDAY"
-                          defaultValue={editingChar?.stats?.[0]?.birthday}
-                          className={styles["input-field"]}
-                        />
-                        <input
-                          name="dimension"
-                          placeholder="DIMENSION"
-                          defaultValue={editingChar?.stats?.[0]?.dimension}
+                          name="age"
+                          defaultValue={editingChar?.stats?.[0]?.age}
                           className={styles["input-field"]}
                         />
                       </div>
-                      <input
-                        name="affiliation"
-                        placeholder="AFFILIATION"
-                        defaultValue={editingChar?.stats?.[0]?.affiliation}
-                        className={styles["input-field"]}
-                      />
+                      <div>
+                        <label>HEIGHT (CM)</label>
+                        <input
+                          type="number"
+                          name="height"
+                          defaultValue={editingChar?.stats?.[0]?.height
+                            ?.toString()
+                            .replace(/\D/g, "")}
+                          placeholder="e.g. 175"
+                          className={styles["input-field"]}
+                        />
+                      </div>
+                      <div>
+                        {/* BIRTHDAY LOGIC */}
+                        {(() => {
+                          const bday = editingChar?.stats?.[0]?.birthday; // e.g., "2000-12-21"
+                          const [_, month, day] = bday
+                            ? bday.split("-")
+                            : ["", "01", "01"];
+
+                          return (
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "10px",
+                                gridColumn: "span 2",
+                              }}
+                            >
+                              <div style={{ flex: 2 }}>
+                                <label>BIRTHDAY MONTH</label>
+                                <select
+                                  name="birth_month"
+                                  defaultValue={month}
+                                  className={styles["input-field"]}
+                                >
+                                  {Array.from({ length: 12 }, (_, i) => (
+                                    <option
+                                      key={i + 1}
+                                      value={String(i + 1).padStart(2, "0")}
+                                    >
+                                      {new Date(2000, i)
+                                        .toLocaleString("default", {
+                                          month: "long",
+                                        })
+                                        .toUpperCase()}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <label>DAY</label>
+                                <select
+                                  name="birth_day"
+                                  defaultValue={day}
+                                  className={styles["input-field"]}
+                                >
+                                  {Array.from({ length: 31 }, (_, i) => (
+                                    <option
+                                      key={i + 1}
+                                      value={String(i + 1).padStart(2, "0")}
+                                    >
+                                      {i + 1}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                      <div>
+                        <label>VITAL STATUS</label>
+                        <select
+                          name="status"
+                          defaultValue={editingChar?.stats?.[0]?.status ?? "1"}
+                          className={styles["input-field"]}
+                        >
+                          {Object.entries(STATUS_MAP).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* TODO Dimension and Organization may need database, 
+                            currently i dont have plan on their names and details
+                            so i not going to save them first 
+                        */}
+                      {/* <div style={{ gridColumn: "span 2" }}>
+                          <label>DIMENSION OF ORIGIN</label>
+                          <input
+                            name="dimension"
+                            defaultValue={editingChar?.stats?.[0]?.dimension}
+                            className={styles["input-field"]}
+                          />
+                        </div> */}
                     </div>
-                  )}
+                    {/* <div style={{ gridColumn: "span 2" }}>
+                        <label>ORGANIZATIONAL AFFILIATION</label>
+                        <input
+                          name="affiliation"
+                          defaultValue={editingChar?.stats?.[0]?.affiliation}
+                          className={styles["input-field"]}
+                        />
+                      </div> */}
+                  </div>
                 </div>
               </div>
 
