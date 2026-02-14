@@ -52,6 +52,27 @@ export const characterService = {
     return data.publicUrl;
   },
 
+  // Used to remove the images if user cleared them without uploading a new one
+  async deleteImage(url: string) {
+    if (!url || url.includes("placeholder")) return;
+
+    try {
+      const path = url.split("public/character-assets/")[1];
+
+      if (path) {
+        const { data, error } = await supabase.storage
+          .from("character-assets")
+          .remove([path]);
+
+        if (error) throw error;
+        return data;
+      }
+    } catch (error) {
+      console.error("Error in deleteAsset:", error);
+      throw error;
+    }
+  },
+
   async save(charPayload: any, statsPayload: any, id?: number) {
     if (!id) {
       // NEW CHARACTER

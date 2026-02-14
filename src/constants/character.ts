@@ -1,3 +1,10 @@
+export const categoryLabels: Record<string, string> = {
+  All: "ALL",
+  Unclassified: "UNCLASSIFIED",
+  Protagonist: "ALLIES",
+  Antagonist: "RIVALS",
+};
+
 // Get main role
 export const ROLE_MAP: Record<number, string> = {
   0: "UNCLASSIFIED",

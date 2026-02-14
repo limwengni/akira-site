@@ -3,6 +3,7 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
     const image = new Image();
     image.addEventListener('load', () => resolve(image));
     image.addEventListener('error', (error) => reject(error));
+    image.setAttribute('crossOrigin', 'anonymous');
     image.src = url;
   });
 
@@ -38,6 +39,6 @@ export async function getCroppedImg(
         return;
       }
       resolve(blob);
-    }, 'image/jpeg');
+    }, 'image/png');
   });
 }

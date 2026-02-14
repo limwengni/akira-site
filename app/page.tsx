@@ -1,173 +1,126 @@
 "use client";
 
+//#region --- Imports ---
+import styles from "./index.module.css";
+import "./globals.css";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Cropper, { Area } from "react-easy-crop";
-import "./globals.css";
-import styles from "./index.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { GENDER_MAP, getRoleLabel, ROLE_MAP } from "../src/constants/character";
-import { authService } from "@/src/services/auth";
+import {
+  GENDER_MAP,
+  getRoleLabel,
+  ROLE_MAP,
+  STATUS_MAP,
+} from "@/src/constants/character";
 import { characterService } from "@/src/services/character";
-import { getCroppedImg } from "@/src/utils/cropUtils";
-import { STATUS_MAP } from "@/src/constants/character";
 
-// --- Sub-components for Layout ---
-const MangaPanel = ({
-  title,
-  children,
-  dark = false,
-}: {
-  title: string;
-  children: React.ReactNode;
-  dark?: boolean;
-}) => (
-  <section
-    className={`${styles.mangaPanel} ${dark ? styles.panelDark : styles.panelLight}`}
-  >
-    <div
-      className={`${styles.panelHeader} ${dark ? styles.headerDark : styles.headerLight}`}
-    >
-      {title}
-    </div>
-    <div className={styles.panelContent}>{children}</div>
-  </section>
-);
+import { useAuth } from "@/src/hooks/useAuth";
+import { useCharacters } from "@/src/hooks/useCharacters";
+import { useImageCrop } from "@/src/hooks/useImageCrop";
+
+import { MangaPanel } from "@/src/components/MangaPanel";
+import { CharacterCard } from "@/src/components/CharacterCard";
+import { Header } from "@/src/components/Header";
+import { Footer } from "@/src/components/Footer";
+
+import { categoryLabels } from "@/src/constants/character";
+// #endregion
 
 export default function Home() {
-  //#region --- States ---
-  const [loading, setLoading] = useState(true);
-  const [clickCount, setClickCount] = useState(0);
-  const [isBlinking, setIsBlinking] = useState(true); // For sound effect
+  //#region --- Path Constants ---
+  const pathname = usePathname();
 
-  const [charList, setCharList] = useState<any[]>([]);
+  const menuItems = [
+    { id: "01", label: "Introduction", href: "/" },
+    { id: "02", label: "Characters", href: "/characters" }, // or whatever your path is
+    { id: "03", label: "World Lore", href: "/world-lore" },
+    { id: "04", label: "Archive", href: "/archive" },
+    { id: "05", label: "About the Artist", href: "/about" },
+  ];
+  //#endregion
+
+  //#region --- States ---
+  const { isLoggedIn, login, logout, checkAuthStatus } = useAuth();
+  const {
+    charList,
+    loading: charLoading,
+    fetchCharacters,
+    handleSave,
+    handleDelete,
+    isSaving,
+  } = useCharacters();
+  const {
+    cropperOpen,
+    tempImgSrc,
+    editingTarget,
+    crop,
+    zoom,
+    setCrop,
+    setZoom,
+    setCroppedAreaPixels,
+    onFileSelect,
+    getFinalCroppedFile,
+    cancelCrop,
+    openExistingInCropper,
+  } = useImageCrop();
+
+  const [showLogin, setShowLogin] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(true);
+
+  const [filter, setFilter] = useState("All");
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
 
   const [editingChar, setEditingChar] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  type Area = {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-
-  const [cropperOpen, setCropperOpen] = useState(false);
-  const [tempImgSrc, setTempImgSrc] = useState<string | null>(null);
-  const [editingTarget, setEditingTarget] = useState<"icon" | "main" | null>(
-    null,
-  );
-  //#endregion
-
-  //#region --- Auth Function ---
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showLogout, setShowLogout] = useState(false);
-  // LOGIN FORM STATE
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = async () => {
-    const { error } = await authService.login(email, password);
-    if (error) {
-      alert("Authentication failed: " + error.message);
-    } else {
-      alert("Login successful!");
-      setIsLoggedIn(true);
-      setShowLogin(false);
-      window.location.reload();
-    }
-  };
-
-  const handleLogout = async () => {
-    const { error } = await authService.logout();
-    if (error) {
-      alert("Logout failed: " + error.message);
-    } else {
-      alert("Logout successful!");
-      setIsLoggedIn(false);
-      window.location.reload();
-    }
-  };
-
-  const checkAuthStatus = async () => {
-    const user = await authService.getSession();
-    setIsLoggedIn(!!user);
-  };
   //#endregion
 
   //#region --- HANDLERS ---
-  const handleSecretClick = () => {
-    setClickCount((prev) => {
-      const nextCount = prev + 1;
+  // Handler for Login
+  const onLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      if (nextCount === 3) {
-        if (isLoggedIn) {
-          setShowLogout(true);
-        } else {
-          setShowLogin(true);
-        }
-        return 0;
-      }
-      return nextCount;
-    });
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      return;
+    }
+
+    const result = await login(email, password);
+    if (result.success) setShowLogin(false); // Close modal on success
   };
 
-  const onFileSelect = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "icon" | "main",
-  ) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const imageDataUrl = URL.createObjectURL(file);
-
-      setTempImgSrc(imageDataUrl);
-      setEditingTarget(type);
-      setCropperOpen(true);
-      setZoom(1); // Reset zoom
-    }
+  // Handler for Logout
+  const onLogoutSubmit = async () => {
+    await logout();
+    setShowLogout(false); // Close modal
   };
 
   const showCroppedImage = async () => {
-    try {
-      if (!tempImgSrc || !croppedAreaPixels) return;
+    const result = await getFinalCroppedFile();
+    if (!result) return;
 
-      // Use our utility to get the blob
-      const croppedBlob = await getCroppedImg(tempImgSrc, croppedAreaPixels);
-
-      const fileName =
-        editingTarget === "icon" ? "cropped-icon.jpg" : "cropped-main.jpg";
-
-      // Convert Blob to File (Optional, but helps keep types consistent)
-      const croppedFile = new File([croppedBlob], fileName, {
-        type: "image/jpeg",
-        lastModified: Date.now(),
-      });
-
-      if (editingTarget === "icon") {
-        setIconFile(croppedFile);
-      } else {
-        setMainFile(croppedFile);
-      }
-
-      // Cleanup
-      setCropperOpen(false);
-      setTempImgSrc(null);
-    } catch (e) {
-      console.error(e);
+    if (result.target === "icon") {
+      setIconFile(result.file);
+    } else {
+      setMainFile(result.file);
     }
   };
 
-  const onCancel = () => {
-    setCropperOpen(false);
-    setTempImgSrc(null); // Clear the temp image so it doesn't linger
-    setEditingTarget(null);
+  const clearImage = (type: "main" | "icon") => {
+    if (type === "main") {
+      setMainFile(null);
+      setEditingChar({ ...editingChar, image_url: null });
+    } else {
+      setIconFile(null);
+      setEditingChar({ ...editingChar, icon_url: null });
+    }
   };
   //#endregion
 
@@ -177,8 +130,7 @@ export default function Home() {
       setLoading(true);
 
       // Fetch Characters
-      const data = await characterService.fetchAllCharacters();
-      setCharList(data.data || []);
+      await fetchCharacters();
 
       await checkAuthStatus();
     } catch (err) {
@@ -188,194 +140,32 @@ export default function Home() {
     }
   };
 
+  // This happens inside your component
+  const filteredCharacters = charList.filter((char) => {
+    if (filter === "All") return true;
+    if (filter === "Unclassified") return char.role === 0;
+    if (filter === "Protagonist") return char.role === 1;
+    if (filter === "Antagonist") return char.role === 2;
+    return true;
+  });
+
   useEffect(() => {
     loadInitialData();
   }, []);
-
-  useEffect(() => {
-    const blink = setInterval(() => setIsBlinking((b) => !b), 500);
-    return () => clearInterval(blink);
-  }, []);
-  //#endregion
-
-  //#region --- Save / Delete Handlers ---
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
-    const isNew = !editingChar?.id;
-
-    let currentSlug = editingChar?.slug || "";
-
-    if (isNew) {
-      // New: Generate "ashita" from "Ashita Kazumi"
-      currentSlug = (data.name as string).trim().split(" ")[0].toLowerCase();
-    }
-
-    const tempMainUrl = mainFile
-      ? URL.createObjectURL(mainFile)
-      : editingChar?.image_url;
-
-    const tempIconUrl = iconFile
-      ? URL.createObjectURL(iconFile)
-      : editingChar?.icon_url;
-
-    const optimisticChar = {
-      id: editingChar?.id || Date.now(), // Temporary ID for new items
-      ...editingChar, // Keep existing data (like ID)
-      name: data.name,
-      role: parseInt(data.role as string),
-      quote: data.quote,
-      image_url: tempMainUrl,
-      icon_url: tempIconUrl,
-      slug: currentSlug,
-    };
-
-    if (isNew) {
-      setCharList((prev) => [optimisticChar, ...prev]); // Add to top of list
-    } else {
-      setCharList((prev) =>
-        prev.map((c) => (c.id === editingChar!.id ? optimisticChar : c)),
-      );
-    }
-
-    const tempEditingId = editingChar?.id; // Remember this for the DB call
-
-    setEditingChar(null);
-    setShowAddForm(false);
-    setMainFile(null);
-    setIconFile(null);
-
-    try {
-      // 1. Upload Images if they exist
-      let finalImageUrl = editingChar?.image_url || "";
-      let finalIconUrl = editingChar?.icon_url || "";
-      let uploadErrors: string[] = [];
-
-      if (mainFile) {
-        try {
-          finalImageUrl = await characterService.uploadImage(
-            mainFile,
-            currentSlug,
-            "main",
-          );
-        } catch (err) {
-          console.error("Main image upload failed", err);
-          uploadErrors.push("Main Image");
-        }
-      }
-      if (iconFile) {
-        try {
-          finalIconUrl = await characterService.uploadImage(
-            iconFile,
-            currentSlug,
-            "icon",
-          );
-        } catch (err) {
-          console.error("Icon upload failed", err);
-          uploadErrors.push("Icon");
-        }
-      }
-
-      const charPayload = {
-        name: data.name,
-        image_url: finalImageUrl,
-        icon_url: finalIconUrl,
-        quote: data.quote,
-        role: parseInt(data.role as string),
-        slug: currentSlug,
-      };
-
-      // Format birthday to YYYY-MM-DD if possible (using dummy year 2000)
-      const birthday = `2000-${data.birth_month}-${data.birth_day}`;
-
-      const rawStats = {
-        age: data.age,
-        gender: data.gender,
-        height: data.height ? parseInt(data.height as string) : null, // Store as number only
-        species: data.species,
-        birthday: birthday,
-        // dimension: parseInt(data.dimension as string) || null,
-        // affiliation: parseInt(data.affiliation as string) || null,
-        status: parseInt(data.status as string) || 1,
-      };
-
-      const statsPayload = Object.fromEntries(
-        Object.entries(rawStats).filter(([_, v]) => v != null && v !== ""),
-      );
-
-      // Save to Database
-      try {
-        await characterService.save(
-          charPayload,
-          statsPayload,
-          isNew ? null : tempEditingId,
-        );
-
-        // FINAL USER FEEDBACK
-        if (uploadErrors.length > 0) {
-          alert(
-            `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
-          );
-        } else {
-          alert("Character saved successfully!");
-        }
-      } catch (dbError) {
-        alert("Failed to save character data. Please try again.");
-      }
-
-      const freshData = await characterService.fetchAllCharacters();
-      if (freshData.data) {
-        setCharList(freshData.data);
-      }
-
-      console.log("Background sync complete.");
-    } catch (err: any) {
-      console.error("Sync failed", err);
-      alert("Critical Sync Error: " + err.message + ". The page will reload.");
-      window.location.reload();
-    }
-  };
-
-  const handleDelete = async (id: number, slug: string) => {
-    if (!confirm("CONFIRM_DELETION?")) return;
-
-    const originalList = [...charList];
-
-    setCharList((prev) => prev.filter((c) => c.id !== id));
-
-    try {
-      await characterService.delete(id, slug);
-      console.log("Character deleted successfully.");
-    } catch (err: any) {
-      console.error("Deletion failed:", err);
-      alert("Deletion Error: " + err.message);
-      setCharList(originalList); // Revert UI
-    }
-  };
   //#endregion
 
   return (
     <>
       <div className={styles.outerViewport}>
         {/* The Centered Page Container */}
-        <div id="manga-page" className={styles.pageContainer}>
+        <div id="mangaPage" className={styles.pageContainer}>
           {/* Halftone Screentone Background */}
           <div className={styles.halftoneBg}></div>
 
           {/* Content Wrapper */}
           <div className={styles.contentWrapper}>
             {/* Manga Title Banner */}
-            <header className={styles.mangaHeader}>
-              <div className={styles.volTag}>VOL. 01 // 2024</div>
-              <h1 className={styles.mangaTitle}>AKIRA'S SECRET BASEMENT</h1>
-              <div className={styles.headerDecor}>
-                <span className={styles.decorLine}></span>
-                <span className={styles.decorText}>Directory</span>
-                <span className={styles.decorLine}></span>
-              </div>
-            </header>
+            <Header />
 
             {/* Main 2-Column Grid Layout */}
             <main className={styles.mainGrid}>
@@ -383,120 +173,71 @@ export default function Home() {
               <aside className={styles.sidebar}>
                 <MangaPanel title="CONTENTS" dark>
                   <nav className={styles.navLinks}>
-                    {[
-                      "01. Introduction",
-                      "02. Protagonists",
-                      "03. The Rivals",
-                      "04. World Lore",
-                      "05. Archive",
-                    ].map((item) => (
-                      <a key={item} href="#" className={styles.navItem}>
-                        <span>{item}</span>
-                      </a>
-                    ))}
+                    {menuItems.map((item) => {
+                      const isActive = pathname === item.href;
+
+                      return (
+                        <a
+                          key={item.id}
+                          href={item.href}
+                          className={`${styles.navItem} ${isActive ? styles.activeNavItem : ""}`}
+                        >
+                          <span>
+                            {item.id}. {item.label}
+                          </span>
+                        </a>
+                      );
+                    })}
                   </nav>
                 </MangaPanel>
 
-                <MangaPanel title="READER REACH">
+                <MangaPanel title="SYSTEM OVERVIEW">
                   <div className={styles.statBox}>
-                    <div className={styles.statNumber}>{charList.length}</div>
+                    <div className={styles.statNumber}>
+                      {charList.length.toString().padStart(2, "0")}
+                    </div>
                     <div className={styles.statLabel}>Subjects Registered</div>
                   </div>
                 </MangaPanel>
-
-                {/* Sound Effect */}
-                {/* <div
-                  className={`${styles.soundEffect} ${isBlinking ? styles.soundBlink : ""}`}
-                >
-                  ゴゴゴ
-                </div> */}
               </aside>
 
               {/* RIGHT SIDE: Character List */}
               <section className={styles.mainContent}>
                 <div className={styles.pagePanel}>
-                  {/* Diagonal Overlay */}
                   <div className={styles.diagonalOverlay}></div>
 
                   {/* Page Header */}
                   <h2 className={styles.pageHeader}>
                     <span className={styles.pageTag}>PAGE 1</span>
-                    <span className={styles.chapterTag}>CHARACTERS</span>
+                    <div className={styles.filterGroup}>
+                      {["All", "Unclassified", "Protagonist", "Antagonist"].map(
+                        (category) => (
+                          <button
+                            key={category}
+                            onClick={() => setFilter(category)}
+                            className={
+                              filter === category
+                                ? styles.activeTab
+                                : styles.tab
+                            }
+                          >
+                            {categoryLabels[category]}
+                          </button>
+                        ),
+                      )}
+                    </div>
                   </h2>
 
                   {/* Character Grid */}
-                  <div className={styles["archive-grid"]}>
-                    {charList?.map((char, index) => (
+                  <div className={styles.archiveGrid}>
+                    {filteredCharacters?.map((char, index) => (
                       <div key={char.id} className={styles.charEntryWrapper}>
-                        <div className={styles["teyan-card"]}>
-                          {/* EDIT ICON - Only visible when logged in */}
-                          {isLoggedIn && (
-                            <div className={styles["action-stack"]}>
-                              <button
-                                className={styles["edit-btn"]}
-                                onClick={() => setEditingChar(char)}
-                                title="Edit Character"
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>
-                              <button
-                                className={styles["delete-btn"]}
-                                onClick={() => handleDelete(char.id, char.slug)}
-                                title="Delete Character"
-                              >
-                                <FontAwesomeIcon icon={faXmark} />
-                              </button>
-                            </div>
-                          )}
-
-                          <div className={styles["img-wrap-container"]}>
-                            <Link
-                              href={`/profile/${char.slug}`}
-                              className={styles["img-wrap"]}
-                            >
-                              <img
-                                src={`${char.image_url}?width=300&height=300&resize=cover`}
-                                alt={char.name}
-                                loading="lazy"
-                              />
-                            </Link>
-                            <div className={styles["avatar-box"]}>
-                              <img
-                                src={char.icon_url || char.image_url}
-                                alt="icon"
-                              />
-                            </div>
-                          </div>
-
-                          <div className={styles["card-meta"]}>
-                            <div className={styles["meta-header"]}>
-                              <div className={styles["name-box"]}>
-                                <h3 className={styles["char-name"]}>
-                                  {char.name}
-                                </h3>
-                                <span
-                                  className={
-                                    char.role === 1
-                                      ? styles["char-role-pro"]
-                                      : char.role === 2
-                                        ? styles["char-role-ant"]
-                                        : styles["char-role"]
-                                  }
-                                  data-role={char.role}
-                                >
-                                  {getRoleLabel(char.role)}
-                                </span>
-                              </div>
-                            </div>
-                            <div className={styles["char-quote"]}>
-                              {char.quote}
-                            </div>
-                          </div>
-                        </div>
-                        {/* Add dotted line separator except for last item */}
-                        {index < charList.length - 1 && (
-                          <div className={styles.dottedSeparator}></div>
-                        )}
+                        <CharacterCard
+                          char={char}
+                          isLoggedIn={isLoggedIn}
+                          onEdit={setEditingChar}
+                          onDelete={handleDelete}
+                        />
                       </div>
                     ))}
                   </div>
@@ -522,27 +263,11 @@ export default function Home() {
             </main>
 
             {/* Footer Section */}
-            <footer className={styles.mangaFooter}>
-              <div className={styles.footerLeft}>
-                <div className={styles.theEnd}>THE END.</div>
-                <p className={styles.footerMeta} onClick={handleSecretClick}>
-                  AKIRA_CORE // © {new Date().getFullYear()}
-                </p>
-              </div>
-              <div className={styles.footerRight}>
-                <div className={styles.footerBlocks}>
-                  {[...Array(8)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`${styles.block} ${i === 0 ? styles.blockActive : ""}`}
-                    ></div>
-                  ))}
-                </div>
-                <div className={styles.copyrightTag}>
-                  Copyright © {new Date().getFullYear()} Akira
-                </div>
-              </div>
-            </footer>
+            <Footer
+              isLoggedIn={isLoggedIn}
+              onOpenLogout={() => setShowLogout(true)}
+              onOpenLogin={() => setShowLogin(true)}
+            />
           </div>
         </div>
       </div>
@@ -550,7 +275,7 @@ export default function Home() {
       {/* FLOATING ADD BUTTON */}
       {isLoggedIn && (
         <button
-          className={styles["add-floating-btn"]}
+          className={styles.addFloatingBtn}
           onClick={() => setShowAddForm(true)}
         >
           +
@@ -560,20 +285,15 @@ export default function Home() {
       {/* --- MODALS --- */}
       {/* Login Popup */}
       {showLogin && (
-        <div className={styles["modal-overlay"]}>
-          <div className={styles["modal-content"]}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
             <h3>ADMIN ACCESS</h3>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault(); // Prevents page reload
-                handleLogin();
-              }}
-            >
+            <form onSubmit={onLoginSubmit}>
               <input
                 type="email"
                 placeholder="Admin Email"
-                className={styles["input-field"]}
+                className={styles.inputField}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
@@ -581,15 +301,25 @@ export default function Home() {
               <input
                 type="password"
                 placeholder="Password"
-                className={styles["input-field"]}
+                className={styles.inputField}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
 
-              <div className={styles["modal-actions"]}>
+              <div className={styles.modalActions}>
                 {/* 2. Set button to type="submit" */}
-                <button type="submit">Unlock</button>
-                <button type="button" onClick={() => setShowLogin(false)}>
+                <button
+                  type="submit"
+                  className={styles.saveBtn}
+                  onClick={onLoginSubmit}
+                >
+                  Unlock
+                </button>
+                <button
+                  type="button"
+                  className={styles.closeBtn}
+                  onClick={() => setShowLogin(false)}
+                >
                   Cancel
                 </button>
               </div>
@@ -600,21 +330,20 @@ export default function Home() {
 
       {/* Logout Confirmation */}
       {showLogout && (
-        <div className={styles["modal-overlay"]}>
-          <div className={styles["modal-content"]}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
             <h3>CONFIRM LOGOUT</h3>
-            <p>ARE YOU SURE YOU WANT TO LOGOUT?</p>
-            <div className={styles["modal-actions"]}>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setShowLogout(false);
-                }}
-              >
-                CONFIRM
+            <p>Are you sure you want to logout?</p>
+            <div className={styles.modalActions}>
+              <button className={styles.saveBtn} onClick={onLogoutSubmit}>
+                Confirm
               </button>
-              <button type="button" onClick={() => setShowLogout(false)}>
-                CANCEL
+              <button
+                className={styles.closeBtn}
+                type="button"
+                onClick={() => setShowLogout(false)}
+              >
+                Cancel
               </button>
             </div>
           </div>
@@ -625,7 +354,7 @@ export default function Home() {
         <div className={styles.loadingOverlay}>
           <div className={styles.loaderBox}>
             <div className={styles.spinner}></div>
-            <p>SYNCHRONIZING_WITH_ARCHIVE...</p>
+            <p>SYNCHRONIZING WITH ARCHIVE...</p>
           </div>
         </div>
       )}
@@ -663,22 +392,19 @@ export default function Home() {
             </div>
 
             <div className={styles.cropperButtons}>
-              {/* RED CANCEL BUTTON */}
-              <button
-                type="button" // Important: preventing form submission
-                onClick={onCancel}
-                className={styles.btnCancel}
-              >
-                Cancel
-              </button>
-
-              {/* GREEN DONE BUTTON */}
               <button
                 type="button"
                 onClick={showCroppedImage}
-                className={styles.btnSave}
+                className={styles.save2Btn}
               >
-                Done
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={cancelCrop}
+                className={styles.close2Btn}
+              >
+                Cancel
               </button>
             </div>
           </div>
@@ -687,11 +413,8 @@ export default function Home() {
 
       {/* Edit / Add Form */}
       {(editingChar || showAddForm) && (
-        <div className={styles["modal-overlay"]}>
-          <div
-            className={styles["modal-content"]}
-            style={{ maxWidth: "900px" }}
-          >
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent} style={{ maxWidth: "900px" }}>
             <header className={styles.modalHeader}>
               <h3>
                 {showAddForm
@@ -700,52 +423,124 @@ export default function Home() {
               </h3>
             </header>
 
-            <form onSubmit={handleSave}>
+            <form
+              onSubmit={(e) =>
+                handleSave(e, editingChar, mainFile, iconFile, () => {
+                  setEditingChar(null);
+                  setShowAddForm(false);
+                  setMainFile(null);
+                  setIconFile(null);
+                })
+              }
+            >
               <div className={styles.formDashboard}>
                 {/* LEFT COLUMN: VISUALS */}
                 <div className={styles.formSidebar}>
                   <label className={styles.fieldLabel}>MAIN SPLASH ART</label>
-                  <div
-                    className={styles.dropZone}
-                    onClick={() => document.getElementById("mainFile")?.click()}
-                  >
-                    <img
-                      src={
-                        mainFile
-                          ? URL.createObjectURL(mainFile)
-                          : editingChar?.image_url || "/placeholder-bg.png"
-                      }
-                      alt="Preview"
-                    />
-                    <input
-                      type="file"
-                      id="mainFile"
-                      hidden
-                      onChange={(e) => onFileSelect(e, "main")}
-                    />
-                    <span>CLICK TO UPLOAD</span>
+                  <div className={styles.dropZoneContainer}>
+                    <div
+                      className={styles.dropZone}
+                      onClick={() => {
+                        if (mainFile) {
+                          openExistingInCropper(
+                            URL.createObjectURL(mainFile),
+                            "main",
+                          );
+                        } else if (editingChar?.image_url) {
+                          openExistingInCropper(editingChar.image_url, "main");
+                        } else {
+                          document.getElementById("mainFile")?.click();
+                        }
+                      }}
+                    >
+                      {!mainFile && !editingChar?.image_url && (
+                        <span>CLICK TO UPLOAD</span>
+                      )}
+                      {(mainFile || editingChar?.image_url) && (
+                        <img
+                          src={
+                            mainFile
+                              ? URL.createObjectURL(mainFile)
+                              : editingChar?.image_url || "/placeholder-bg.png"
+                          }
+                          alt="Preview"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        id="mainFile"
+                        hidden
+                        onChange={(e) => onFileSelect(e, "main")}
+                      />
+                    </div>
+                    <div className={styles.actionRow}>
+                      {(mainFile || editingChar?.image_url) && (
+                        <button
+                          type="button"
+                          className={styles.clearBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearImage("main");
+                          }}
+                        >
+                          REMOVE
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <label className={styles.fieldLabel}>SYSTEM ICON</label>
-                  <div
-                    className={styles.dropZoneSmall}
-                    onClick={() => document.getElementById("iconFile")?.click()}
-                  >
-                    <img
-                      src={
-                        iconFile
-                          ? URL.createObjectURL(iconFile)
-                          : editingChar?.icon_url || "/placeholder-icon.png"
-                      }
-                      alt="Preview"
-                    />
-                    <input
-                      type="file"
-                      id="iconFile"
-                      hidden
-                      accept="image/*"
-                      onChange={(e) => onFileSelect(e, "icon")}
-                    />
+                  <div className={styles.dropZoneContainer}>
+                    <div
+                      className={styles.dropZoneSmall}
+                      onClick={() => {
+                        if (iconFile) {
+                          openExistingInCropper(
+                            URL.createObjectURL(iconFile),
+                            "icon",
+                          );
+                        } else if (editingChar?.icon_url) {
+                          openExistingInCropper(editingChar.icon_url, "icon");
+                        } else {
+                          document.getElementById("iconFile")?.click();
+                        }
+                      }}
+                    >
+                      {!iconFile && !editingChar?.icon_url && (
+                        <span style={{ fontSize: 10 }}>CLICK TO UPLOAD</span>
+                      )}
+                      {(iconFile || editingChar?.icon_url) && (
+                        <img
+                          src={
+                            iconFile
+                              ? URL.createObjectURL(iconFile)
+                              : editingChar?.icon_url || "/placeholder-icon.png"
+                          }
+                          alt="Preview"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        id="iconFile"
+                        hidden
+                        onChange={(e) => onFileSelect(e, "icon")}
+                      />
+                    </div>
+
+                    <div className={styles.actionRow}>
+                      {(iconFile || editingChar?.icon_url) && (
+                        <button
+                          type="button"
+                          className={styles.clearBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearImage("icon");
+                          }}
+                        >
+                          REMOVE
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -757,7 +552,7 @@ export default function Home() {
                       <input
                         name="name"
                         defaultValue={editingChar?.name}
-                        className={styles["input-field"]}
+                        className={styles.inputField}
                         required
                       />
                     </div>
@@ -766,7 +561,7 @@ export default function Home() {
                       <select
                         name="role"
                         defaultValue={editingChar?.role || "0"}
-                        className={styles["input-field"]}
+                        className={styles.inputField}
                       >
                         {Object.entries(ROLE_MAP).map(([value, label]) => (
                           <option key={value} value={value}>
@@ -781,7 +576,7 @@ export default function Home() {
                   <textarea
                     name="quote"
                     defaultValue={editingChar?.quote}
-                    className={styles["input-field"]}
+                    className={styles.inputField}
                     rows={2}
                   />
 
@@ -795,7 +590,7 @@ export default function Home() {
                         <select
                           name="gender"
                           defaultValue={editingChar?.stats?.[0]?.gender ?? "1"}
-                          className={styles["input-field"]}
+                          className={styles.inputField}
                         >
                           {Object.entries(GENDER_MAP).map(([value, label]) => (
                             <option key={value} value={value}>
@@ -809,7 +604,7 @@ export default function Home() {
                         <input
                           name="species"
                           defaultValue={editingChar?.stats?.[0]?.species}
-                          className={styles["input-field"]}
+                          className={styles.inputField}
                         />
                       </div>
                       <div>
@@ -817,7 +612,7 @@ export default function Home() {
                         <input
                           name="age"
                           defaultValue={editingChar?.stats?.[0]?.age}
-                          className={styles["input-field"]}
+                          className={styles.inputField}
                         />
                       </div>
                       <div>
@@ -829,7 +624,7 @@ export default function Home() {
                             ?.toString()
                             .replace(/\D/g, "")}
                           placeholder="e.g. 175"
-                          className={styles["input-field"]}
+                          className={styles.inputField}
                         />
                       </div>
                       <div>
@@ -853,7 +648,7 @@ export default function Home() {
                                 <select
                                   name="birth_month"
                                   defaultValue={month}
-                                  className={styles["input-field"]}
+                                  className={styles.inputField}
                                 >
                                   {Array.from({ length: 12 }, (_, i) => (
                                     <option
@@ -874,7 +669,7 @@ export default function Home() {
                                 <select
                                   name="birth_day"
                                   defaultValue={day}
-                                  className={styles["input-field"]}
+                                  className={styles.inputField}
                                 >
                                   {Array.from({ length: 31 }, (_, i) => (
                                     <option
@@ -895,7 +690,7 @@ export default function Home() {
                         <select
                           name="status"
                           defaultValue={editingChar?.stats?.[0]?.status ?? "1"}
-                          className={styles["input-field"]}
+                          className={styles.inputField}
                         >
                           {Object.entries(STATUS_MAP).map(([value, label]) => (
                             <option key={value} value={value}>
@@ -913,7 +708,7 @@ export default function Home() {
                           <input
                             name="dimension"
                             defaultValue={editingChar?.stats?.[0]?.dimension}
-                            className={styles["input-field"]}
+                            className={styles.inputField}
                           />
                         </div> */}
                     </div>
@@ -922,16 +717,24 @@ export default function Home() {
                         <input
                           name="affiliation"
                           defaultValue={editingChar?.stats?.[0]?.affiliation}
-                          className={styles["input-field"]}
+                          className={styles.inputField}
                         />
                       </div> */}
                   </div>
                 </div>
               </div>
 
-              <div className={styles["modal-actions"]}>
-                <button type="submit" className={styles.saveBtn}>
-                  SYNCHRONIZE
+              <div className={styles.modalActions}>
+                <button
+                  type="submit"
+                  className={styles.saveBtn}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <span className={styles.loadingFlex}>SYNCING...</span>
+                  ) : (
+                    "SYNCHRONIZE"
+                  )}
                 </button>
                 <button
                   type="button"

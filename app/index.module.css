@@ -194,6 +194,15 @@
   text-decoration-thickness: 3px;
 }
 
+.activeNavItem {
+  color: #000 !important;
+  background: #fff;
+  font-weight: 900;
+  padding: 8px 16px;
+  clip-path: polygon(0% 0%, 95% 0%, 100% 50%, 95% 100%, 0% 100%);
+  margin-left: -10px;
+}
+
 /* Stats */
 .statBox {
   text-align: center;
@@ -302,7 +311,7 @@
    4. CHARACTER GRID
    ========================================= */
 
-.archive-grid {
+.archiveGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 30px;
@@ -314,7 +323,7 @@
   height: 100%;
 }
 
-.teyan-card {
+.teyanCard {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -328,28 +337,28 @@
   height: 100%;
 }
 
-.teyan-card:hover {
+.teyanCard:hover {
   transform: translate(-3px, -3px);
   box-shadow: 10px 10px 0px rgba(0, 0, 0, 1);
 }
 
 /* Image Area */
-.img-wrap-container {
+.imgWrapContainer {
   position: relative;
   width: 100%;
   border-bottom: 3px solid #000;
 }
 
-.img-wrap {
+.imgWrap {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 2 / 3;
   background-color: #f8f8f8;
   overflow: hidden;
   position: relative;
 }
 
-.img-wrap img {
+.imgWrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -357,12 +366,12 @@
   object-position: top center;
 }
 
-.teyan-card:hover .img-wrap img {
+.teyanCard:hover .imgWrap img {
   transform: scale(1.03);
 }
 
 /* Avatar - Square it off for manga style */
-.avatar-box {
+.avatarBox {
   position: absolute;
   bottom: -30px;
   left: 20px;
@@ -374,14 +383,14 @@
   z-index: 2;
 }
 
-.avatar-box img {
+.avatarBox img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 /* Meta Area */
-.card-meta {
+.cardMeta {
   padding: 35px 20px 20px; /* Top padding to clear avatar */
   text-align: left;
   background: #fff;
@@ -391,19 +400,19 @@
   flex-grow: 1;
 }
 
-.meta-header {
+.metaHeader {
   display: flex;
   flex-direction: column;
   min-height: auto;
   padding-left: 0; /* Resetting the padding since avatar is now styled differently */
 }
 
-.name-box {
+.nameBox {
   display: flex;
   flex-direction: column;
 }
 
-.char-name {
+.charName {
   font-size: 1.4rem;
   text-transform: uppercase;
   font-weight: 900;
@@ -413,7 +422,7 @@
   margin-bottom: 4px;
 }
 
-.char-role {
+.charRole {
   font-size: 0.7rem;
   font-weight: 900;
   color: #888; /* Default black for neutral */
@@ -421,7 +430,7 @@
   text-transform: uppercase;
 }
 
-.char-role-ant {
+.charRoleAnt {
   font-size: 0.7rem;
   font-weight: 900;
   color: rgb(220, 20, 60); /* Red accent */
@@ -429,7 +438,7 @@
   text-transform: uppercase;
 }
 
-.char-role-pro {
+.charRolePro {
   font-size: 0.7rem;
   font-weight: 900;
   color: rgb(0, 158, 221); /* Blue accent */
@@ -437,7 +446,7 @@
   text-transform: uppercase;
 }
 
-.char-quote {
+.charQuote {
   font-size: 0.85rem;
   color: #444;
   font-style: italic;
@@ -511,6 +520,9 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and 11 */
+  user-select: none; /* Standard syntax */
 }
 
 .theEnd {
@@ -519,13 +531,7 @@
   font-style: italic;
   line-height: 1;
   letter-spacing: -2px;
-}
-
-.footerMeta {
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  margin-top: 5px;
+  cursor: default;
 }
 
 .footerRight {
@@ -557,13 +563,14 @@
   font-weight: 900;
   letter-spacing: 2px;
   text-transform: uppercase;
+  cursor: default;
 }
 
 /* =========================================
    6. FORMS & MODALS
    ========================================= */
 
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -578,7 +585,7 @@
   animation: fadeIn 0.3s ease;
 }
 
-.modal-content {
+.modalContent {
   background: #fff;
   border: 4px solid #000; /* Thick border for manga feel */
   padding: 40px;
@@ -620,6 +627,13 @@
 }
 
 /* Dropzones */
+.dropZoneContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .dropZone {
   width: 100%;
   aspect-ratio: 2/3;
@@ -627,7 +641,6 @@
   position: relative;
   cursor: pointer;
   overflow: hidden;
-  margin-bottom: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -666,8 +679,49 @@
   object-fit: cover;
 }
 
+.actionRow {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.uploadNewBtn {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  font-size: 0.7rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 0.1s;
+}
+
+.uploadNewBtn:hover {
+  background: #333;
+  transform: scale(1.02);
+}
+
+.clearBtn {
+  background: #fff;
+  color: var(--error-color); /* Red for remove */
+  border: 2px solid var(--error-color);
+  padding: 5px 10px;
+  font-size: 0.7rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.clearBtn:hover {
+  background: var(--error-color);
+  color: #fff;
+}
+
 /* Inputs */
-.input-field {
+.inputField {
   width: 100%;
   padding: 12px 15px;
   margin-bottom: 20px;
@@ -678,7 +732,7 @@
   transition: all 0.2s ease;
   font-weight: bold;
 }
-.input-field:focus {
+.inputField:focus {
   outline: none;
   border-color: #000;
   background: #fff;
@@ -703,22 +757,24 @@
 }
 
 /* Modal Actions */
-.modal-actions {
+.modalActions {
   display: flex;
   gap: 10px;
   margin-top: 20px;
 }
 .saveBtn,
-.closeBtn {
+.save2Btn,
+.closeBtn,
+.close2Btn {
   flex: 1;
   padding: 15px;
   font-weight: 900;
   text-transform: uppercase;
   cursor: pointer;
-  border: 3px solid #000;
   transition: all 0.2s;
 }
 .saveBtn {
+  border: 3px solid #000;
   background: #000;
   color: #fff;
 }
@@ -726,16 +782,34 @@
   background: #fff;
   color: #000;
 }
-.closeBtn {
+.saveBtn:disabled {
+  background: var(--screentone-grey, #ccc);
+  border-color: #999;
+  color: #666;
+  cursor: wait; /* Shows the loading spinner cursor */
+  transform: none; /* Prevents any hover scaling you might have */
+  opacity: 0.8;
+}
+.save2Btn {
   background: #fff;
   color: #000;
 }
+.closeBtn {
+  border: 3px solid var(--error-color);
+  background: #fff;
+  color: var(--error-color);
+}
 .closeBtn:hover {
-  background: #eee;
+  background: var(--error-color);
+  color: #fff;
+}
+.close2Btn {
+  background: var(--error-color);
+  color: #fff;
 }
 
 /* Floating & Action Buttons */
-.add-floating-btn {
+.addFloatingBtn {
   position: fixed;
   bottom: 40px;
   right: 40px;
@@ -751,11 +825,11 @@
   z-index: 90;
   transition: transform 0.2s;
 }
-.add-floating-btn:hover {
+.addFloatingBtn:hover {
   transform: scale(1.1) rotate(90deg);
 }
 
-.action-stack {
+.actionStack {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -765,8 +839,8 @@
   gap: 10px;
 }
 
-.edit-btn,
-.delete-btn {
+.editBtn,
+.deleteBtn {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -779,21 +853,21 @@
   box-shadow: 2px 2px 0px #000;
   transition: all 0.2s;
 }
-.edit-btn {
+.editBtn {
   background: #fff;
   color: #000;
 }
-.edit-btn:hover {
+.editBtn:hover {
   background: #000;
   color: #fff;
 }
-.delete-btn {
+.deleteBtn {
   background: #fff;
-  color: #d00;
-  border-color: #d00;
+  color: var(--error-color);
+  border-color: var(--error-color);
 }
-.delete-btn:hover {
-  background: #d00;
+.deleteBtn:hover {
+  background: var(--error-color);
   color: #fff;
 }
 
@@ -827,22 +901,6 @@
   gap: 15px;
   justify-content: center;
 }
-.btnCancel,
-.btnSave {
-  border: none;
-  padding: 10px 20px;
-  font-weight: bold;
-  cursor: pointer;
-  text-transform: uppercase;
-}
-.btnCancel {
-  background: #d00;
-  color: #fff;
-}
-.btnSave {
-  background: #fff;
-  color: #000;
-}
 
 .loadingOverlay {
   position: fixed;
@@ -865,6 +923,31 @@
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
 }
+
+.filterGroup {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 0;
+}
+.tab {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 5px;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: #888;
+  transition: all 0.2s ease;
+  
+  border-bottom: 2px solid transparent; 
+  margin-bottom: -1px;
+}
+.activeTab {
+  color: var(--text);
+  font-weight: bold;
+  border-bottom: 2px solid var(--screentone-grey);
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -923,7 +1006,7 @@
     padding: 20px;
   }
 
-  .archive-grid {
+  .archiveGrid {
     grid-template-columns: 1fr; /* 1 Column Grid */
   }
 
