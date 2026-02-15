@@ -10,6 +10,7 @@ interface MangaPanelProps {
   children: React.ReactNode;
   dark?: boolean;
   collapsible?: boolean;
+  defaultOpen?: boolean;
 }
 
 export const MangaPanel = ({
@@ -17,11 +18,9 @@ export const MangaPanel = ({
   children,
   dark = false,
   collapsible = false,
+  defaultOpen = false,
 }: MangaPanelProps) => {
-  // Start closed. 
-  // Mobile/Tablet will see it closed. 
-  // Desktop CSS will ignore this and force it open.
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <section

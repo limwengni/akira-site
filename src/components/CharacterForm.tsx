@@ -759,7 +759,7 @@ export const CharacterForm = ({
                     </div>
                     <div className={styles.addEntryArea}>
                       <input
-                        placeholder="Person / Role"
+                        placeholder="Person"
                         value={tempRel.name}
                         onChange={(e) =>
                           setTempRel({ ...tempRel, name: e.target.value })
