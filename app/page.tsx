@@ -26,6 +26,11 @@ import { Header } from "@/src/components/Header";
 import { Footer } from "@/src/components/Footer";
 
 import { categoryLabels } from "@/src/constants/character";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // #endregion
 
 export default function Home() {
@@ -171,7 +176,7 @@ export default function Home() {
             <main className={styles.mainGrid}>
               {/* LEFT SIDE: Sidebar */}
               <aside className={styles.sidebar}>
-                <MangaPanel title="CONTENTS" dark>
+                <MangaPanel title="CONTENTS" dark collapsible={true}>
                   <nav className={styles.navLinks}>
                     {menuItems.map((item) => {
                       const isActive = pathname === item.href;
@@ -245,8 +250,13 @@ export default function Home() {
                   {/* Pagination Footer */}
                   <div className={styles.paginationFooter}>
                     <button className={styles.pageBtn} disabled>
-                      ← NEXT
+                      <FontAwesomeIcon
+                        icon={faChevronLeft}
+                        style={{ marginRight: "8px" }}
+                      />
+                      PREV
                     </button>
+
                     <div className={styles.pageNumbers}>
                       <button
                         className={`${styles.numBtn} ${styles.activeNum}`}
@@ -254,8 +264,13 @@ export default function Home() {
                         1
                       </button>
                     </div>
+
                     <button className={styles.pageBtn} disabled>
-                      PREV →
+                      NEXT
+                      <FontAwesomeIcon
+                        icon={faChevronRight}
+                        style={{ marginLeft: "8px" }}
+                      />
                     </button>
                   </div>
                 </div>
@@ -287,7 +302,9 @@ export default function Home() {
       {showLogin && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h3>ADMIN ACCESS</h3>
+            <header className={styles.modalHeader}>
+              <h3>ADMIN ACCESS</h3>
+            </header>
 
             <form onSubmit={onLoginSubmit}>
               <input
@@ -297,7 +314,7 @@ export default function Home() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-
+              <div style={{ paddingBottom: "15px" }}></div>
               <input
                 type="password"
                 placeholder="Password"
@@ -332,7 +349,9 @@ export default function Home() {
       {showLogout && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h3>CONFIRM LOGOUT</h3>
+            <header className={styles.modalHeader}>
+              <h3>CONFIRM LOGOUT</h3>
+            </header>
             <p>Are you sure you want to logout?</p>
             <div className={styles.modalActions}>
               <button className={styles.saveBtn} onClick={onLogoutSubmit}>
@@ -436,110 +455,118 @@ export default function Home() {
               <div className={styles.formDashboard}>
                 {/* LEFT COLUMN: VISUALS */}
                 <div className={styles.formSidebar}>
-                  <label className={styles.fieldLabel}>MAIN SPLASH ART</label>
-                  <div className={styles.dropZoneContainer}>
-                    <div
-                      className={styles.dropZone}
-                      onClick={() => {
-                        if (mainFile) {
-                          openExistingInCropper(
-                            URL.createObjectURL(mainFile),
-                            "main",
-                          );
-                        } else if (editingChar?.image_url) {
-                          openExistingInCropper(editingChar.image_url, "main");
-                        } else {
-                          document.getElementById("mainFile")?.click();
-                        }
-                      }}
-                    >
-                      {!mainFile && !editingChar?.image_url && (
-                        <span>CLICK TO UPLOAD</span>
-                      )}
-                      {(mainFile || editingChar?.image_url) && (
-                        <img
-                          src={
-                            mainFile
-                              ? URL.createObjectURL(mainFile)
-                              : editingChar?.image_url || "/placeholder-bg.png"
+                  <div>
+                    <label className={styles.fieldLabel}>MAIN SPLASH ART</label>
+                    <div className={styles.dropZoneContainer}>
+                      <div
+                        className={styles.dropZone}
+                        onClick={() => {
+                          if (mainFile) {
+                            openExistingInCropper(
+                              URL.createObjectURL(mainFile),
+                              "main",
+                            );
+                          } else if (editingChar?.image_url) {
+                            openExistingInCropper(
+                              editingChar.image_url,
+                              "main",
+                            );
+                          } else {
+                            document.getElementById("mainFile")?.click();
                           }
-                          alt="Preview"
+                        }}
+                      >
+                        {!mainFile && !editingChar?.image_url && (
+                          <span>CLICK TO UPLOAD</span>
+                        )}
+                        {(mainFile || editingChar?.image_url) && (
+                          <img
+                            src={
+                              mainFile
+                                ? URL.createObjectURL(mainFile)
+                                : editingChar?.image_url ||
+                                  "/placeholder-bg.png"
+                            }
+                            alt="Preview"
+                          />
+                        )}
+                        <input
+                          type="file"
+                          id="mainFile"
+                          hidden
+                          onChange={(e) => onFileSelect(e, "main")}
                         />
-                      )}
-                      <input
-                        type="file"
-                        id="mainFile"
-                        hidden
-                        onChange={(e) => onFileSelect(e, "main")}
-                      />
-                    </div>
-                    <div className={styles.actionRow}>
-                      {(mainFile || editingChar?.image_url) && (
-                        <button
-                          type="button"
-                          className={styles.clearBtn}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearImage("main");
-                          }}
-                        >
-                          REMOVE
-                        </button>
-                      )}
+                      </div>
+                      <div className={styles.actionRow}>
+                        {(mainFile || editingChar?.image_url) && (
+                          <button
+                            type="button"
+                            className={styles.clearBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearImage("main");
+                            }}
+                          >
+                            REMOVE
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  <label className={styles.fieldLabel}>SYSTEM ICON</label>
-                  <div className={styles.dropZoneContainer}>
-                    <div
-                      className={styles.dropZoneSmall}
-                      onClick={() => {
-                        if (iconFile) {
-                          openExistingInCropper(
-                            URL.createObjectURL(iconFile),
-                            "icon",
-                          );
-                        } else if (editingChar?.icon_url) {
-                          openExistingInCropper(editingChar.icon_url, "icon");
-                        } else {
-                          document.getElementById("iconFile")?.click();
-                        }
-                      }}
-                    >
-                      {!iconFile && !editingChar?.icon_url && (
-                        <span style={{ fontSize: 10 }}>CLICK TO UPLOAD</span>
-                      )}
-                      {(iconFile || editingChar?.icon_url) && (
-                        <img
-                          src={
-                            iconFile
-                              ? URL.createObjectURL(iconFile)
-                              : editingChar?.icon_url || "/placeholder-icon.png"
+                  <div>
+                    <label className={styles.fieldLabel}>SYSTEM ICON</label>
+                    <div className={styles.dropZoneContainer}>
+                      <div
+                        className={styles.dropZoneSmall}
+                        onClick={() => {
+                          if (iconFile) {
+                            openExistingInCropper(
+                              URL.createObjectURL(iconFile),
+                              "icon",
+                            );
+                          } else if (editingChar?.icon_url) {
+                            openExistingInCropper(editingChar.icon_url, "icon");
+                          } else {
+                            document.getElementById("iconFile")?.click();
                           }
-                          alt="Preview"
+                        }}
+                      >
+                        {!iconFile && !editingChar?.icon_url && (
+                          <span style={{ fontSize: 10 }}>CLICK TO UPLOAD</span>
+                        )}
+                        {(iconFile || editingChar?.icon_url) && (
+                          <img
+                            src={
+                              iconFile
+                                ? URL.createObjectURL(iconFile)
+                                : editingChar?.icon_url ||
+                                  "/placeholder-icon.png"
+                            }
+                            alt="Preview"
+                          />
+                        )}
+                        <input
+                          type="file"
+                          id="iconFile"
+                          hidden
+                          onChange={(e) => onFileSelect(e, "icon")}
                         />
-                      )}
-                      <input
-                        type="file"
-                        id="iconFile"
-                        hidden
-                        onChange={(e) => onFileSelect(e, "icon")}
-                      />
-                    </div>
+                      </div>
 
-                    <div className={styles.actionRow}>
-                      {(iconFile || editingChar?.icon_url) && (
-                        <button
-                          type="button"
-                          className={styles.clearBtn}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearImage("icon");
-                          }}
-                        >
-                          REMOVE
-                        </button>
-                      )}
+                      <div className={styles.actionRow}>
+                        {(iconFile || editingChar?.icon_url) && (
+                          <button
+                            type="button"
+                            className={styles.clearBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearImage("icon");
+                            }}
+                          >
+                            REMOVE
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -548,7 +575,7 @@ export default function Home() {
                 <div className={styles.formMain}>
                   <div className={styles.formRow}>
                     <div style={{ flex: 2 }}>
-                      <label>SUBJECT NAME</label>
+                      <label className={styles.fieldLabel}>SUBJECT NAME</label>
                       <input
                         name="name"
                         defaultValue={editingChar?.name}
@@ -557,7 +584,9 @@ export default function Home() {
                       />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <label>ROLE DESIGNATION</label>
+                      <label className={styles.fieldLabel}>
+                        ROLE DESIGNATION
+                      </label>
                       <select
                         name="role"
                         defaultValue={editingChar?.role || "0"}
@@ -572,7 +601,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <label>DESIGNATED QUOTE</label>
+                  <label className={styles.fieldLabel}>DESIGNATED QUOTE</label>
                   <textarea
                     name="quote"
                     defaultValue={editingChar?.quote}
@@ -586,7 +615,7 @@ export default function Home() {
                     </h4>
                     <div className={styles.statsGrid}>
                       <div>
-                        <label>GENDER</label>
+                        <label className={styles.fieldLabel}>GENDER</label>
                         <select
                           name="gender"
                           defaultValue={editingChar?.stats?.[0]?.gender ?? "1"}
@@ -600,7 +629,7 @@ export default function Home() {
                         </select>
                       </div>
                       <div>
-                        <label>SPECIES</label>
+                        <label className={styles.fieldLabel}>SPECIES</label>
                         <input
                           name="species"
                           defaultValue={editingChar?.stats?.[0]?.species}
@@ -608,7 +637,7 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <label>AGE</label>
+                        <label className={styles.fieldLabel}>AGE</label>
                         <input
                           name="age"
                           defaultValue={editingChar?.stats?.[0]?.age}
@@ -616,7 +645,7 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <label>HEIGHT (CM)</label>
+                        <label className={styles.fieldLabel}>HEIGHT (CM)</label>
                         <input
                           type="number"
                           name="height"
@@ -644,7 +673,9 @@ export default function Home() {
                               }}
                             >
                               <div style={{ flex: 2 }}>
-                                <label>BIRTHDAY MONTH</label>
+                                <label className={styles.fieldLabel}>
+                                  BIRTHDAY MONTH
+                                </label>
                                 <select
                                   name="birth_month"
                                   defaultValue={month}
@@ -665,7 +696,7 @@ export default function Home() {
                                 </select>
                               </div>
                               <div style={{ flex: 1 }}>
-                                <label>DAY</label>
+                                <label className={styles.fieldLabel}>DAY</label>
                                 <select
                                   name="birth_day"
                                   defaultValue={day}
@@ -686,7 +717,9 @@ export default function Home() {
                         })()}
                       </div>
                       <div>
-                        <label>VITAL STATUS</label>
+                        <label className={styles.fieldLabel}>
+                          VITAL STATUS
+                        </label>
                         <select
                           name="status"
                           defaultValue={editingChar?.stats?.[0]?.status ?? "1"}
@@ -704,7 +737,7 @@ export default function Home() {
                             so i not going to save them first 
                         */}
                       {/* <div style={{ gridColumn: "span 2" }}>
-                          <label>DIMENSION OF ORIGIN</label>
+                          <label className={styles.fieldLabel}>DIMENSION OF ORIGIN</label>
                           <input
                             name="dimension"
                             defaultValue={editingChar?.stats?.[0]?.dimension}
@@ -713,7 +746,7 @@ export default function Home() {
                         </div> */}
                     </div>
                     {/* <div style={{ gridColumn: "span 2" }}>
-                        <label>ORGANIZATIONAL AFFILIATION</label>
+                        <label className={styles.fieldLabel}>ORGANIZATIONAL AFFILIATION</label>
                         <input
                           name="affiliation"
                           defaultValue={editingChar?.stats?.[0]?.affiliation}
