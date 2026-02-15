@@ -816,6 +816,12 @@ select.inputField {
   gap: 15px;
 }
 
+.loreGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
 /* Modal Actions */
 .modalActions {
   display: flex;
@@ -1061,6 +1067,366 @@ select.inputField {
   }
 }
 
+/* Second Form Page */
+/* Container for two lore sections side-by-side */
+.twoColLore {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 20px;
+  width: 100%;
+}
+
+/* Make sure the lore sections take full width within their grid cell */
+.loreSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* For the Bio section which should stay full width */
+.loreSectionFull {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+/* Row for the Name input and Add (+) button */
+.listInputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.addEntryArea {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed #444;
+}
+
+.deleteIcon {
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.deleteIcon:hover {
+  color: #ff4d4d;
+}
+
+.triviaList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.addListBtn {
+  background: #fff;
+  border: 3px solid #000;
+  padding: 5px 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-style: italic;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addListBtn:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* Container for Ability/Relationship/Label chips */
+.chipContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Individual Lore Item (The "Chip") */
+.loreChip {
+  border: 1px solid #000;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.loreChip svg {
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.loreChip svg:hover {
+  color: #ff4d4d; /* Red for delete */
+}
+
+/* Trivia List Styling */
+.triviaList {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.triviaList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px;
+  border-bottom: 1px dashed #ccc;
+  font-size: 0.9rem;
+  gap: 10px;
+}
+
+/* Hint text for file paths */
+.hintText {
+  font-size: 0.75rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 5px;
+}
+
+.tableScrollWrapper {
+  max-height: 300px; /* Limits height and enables scroll */
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.02);
+  padding-bottom: 15px;
+}
+
+.loreTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.loreTable th {
+  background: #000;
+  color: #fff;
+  text-align: left;
+  padding: 8px;
+  position: sticky; /* Keeps header visible while scrolling */
+  top: 0;
+  border: 1px solid #000;
+}
+
+.loreTable td {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.tableInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+
+.tableInput:focus {
+  background: rgba(255, 255, 0, 0.1); /* Slight yellow highlight when editing */
+}
+
+/* --- Nav Styles --- */
+.formNav {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.navButtons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.navBtn {
+  background: transparent;
+  border: none;
+  color: #555;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 5px 15px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.navNum {
+  font-size: 0.6rem;
+  vertical-align: top;
+  margin-right: 4px;
+  opacity: 0.5;
+}
+
+.activeNav {
+  color: var(--text);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* THE LINE REPLACEMENT: Segmented Blocks */
+.progressSegments {
+  display: flex;
+  gap: 10px;
+  height: 6px;
+  width: 100%;
+  transform: skewX(-20deg); /* The slanted manga look */
+}
+
+.segment {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.4s ease;
+}
+
+.segment.filled {
+  background: #fff; /* Use your accent color here like #ff4d4d or yellow */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* --- Gallery Styles --- */
+.galleryDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px dashed #444;
+  padding: 40px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.galleryDropzone:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.galleryPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.galleryItem {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid #333;
+  overflow: hidden;
+}
+
+.galleryImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryItemOverlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.8);
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+}
+
+.removeImgBtn {
+  background: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+}
+
+.galleryPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #333;
+  margin-top: 10px;
+}
+
+.galleryItem {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border: 1px solid #444;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.galleryItem:hover {
+  transform: scale(1.02);
+  border-color: #fff;
+}
+
+.galleryImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(20%);
+}
+
+.galleryItemOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #444;
+}
+
+.fileName {
+  font-size: 0.65rem;
+  color: #aaa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.emptyGalleryMsg {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #444;
+  font-weight: bold;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+}
+
+/* Responsive: Stack columns on mobile */
+@media (max-width: 768px) {
+  .twoColLore {
+    grid-template-columns: 1fr;
+  }
+  .loreSectionFull {
+    grid-column: span 1;
+  }
+}
+
 /* =========================================
    7. MOBILE RESPONSIVENESS
    ========================================= */
@@ -1303,6 +1669,10 @@ select.inputField {
   }
 
   .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .loreGrid {
     grid-template-columns: 1fr;
   }
 

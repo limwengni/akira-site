@@ -8,13 +8,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Cropper, { Area } from "react-easy-crop";
-import {
-  GENDER_MAP,
-  getRoleLabel,
-  ROLE_MAP,
-  STATUS_MAP,
-} from "@/src/constants/character";
-import { characterService } from "@/src/services/character";
 
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCharacters } from "@/src/hooks/useCharacters";
@@ -22,6 +15,7 @@ import { useImageCrop } from "@/src/hooks/useImageCrop";
 
 import { MangaPanel } from "@/src/components/MangaPanel";
 import { CharacterCard } from "@/src/components/CharacterCard";
+
 import { Header } from "@/src/components/Header";
 import { Footer } from "@/src/components/Footer";
 
@@ -31,6 +25,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CharacterForm } from "@/src/components/CharacterForm";
 // #endregion
 
 export default function Home() {
@@ -121,10 +116,16 @@ export default function Home() {
   const clearImage = (type: "main" | "icon") => {
     if (type === "main") {
       setMainFile(null);
-      setEditingChar({ ...editingChar, image_url: null });
+      if (editingChar) setEditingChar({ ...editingChar, image_url: null });
+      // Reset the actual HTML input value
+      const input = document.getElementById("mainFile") as HTMLInputElement;
+      if (input) input.value = "";
     } else {
       setIconFile(null);
-      setEditingChar({ ...editingChar, icon_url: null });
+      if (editingChar) setEditingChar({ ...editingChar, icon_url: null });
+      // Reset the actual HTML input value
+      const input = document.getElementById("iconFile") as HTMLInputElement;
+      if (input) input.value = "";
     }
   };
   //#endregion
@@ -447,359 +448,23 @@ export default function Home() {
 
       {/* Edit / Add Form */}
       {(editingChar || showAddForm) && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent} style={{ maxWidth: "900px" }}>
-            <header className={styles.modalHeader}>
-              <h3>
-                {showAddForm
-                  ? "// INITIALIZING NEW ENTRY"
-                  : `// EDITING SUBJECT: ${editingChar?.name}`}
-              </h3>
-            </header>
-
-            <form
-              onSubmit={(e) =>
-                handleSave(e, editingChar, mainFile, iconFile, () => {
-                  setEditingChar(null);
-                  setShowAddForm(false);
-                  setMainFile(null);
-                  setIconFile(null);
-                })
-              }
-            >
-              <div className={styles.formDashboard}>
-                {/* LEFT COLUMN: VISUALS */}
-                <div className={styles.formSidebar}>
-                  <div>
-                    <label className={styles.fieldLabel}>MAIN SPLASH ART</label>
-                    <div className={styles.dropZoneContainer}>
-                      <div
-                        className={styles.dropZone}
-                        onClick={() => {
-                          if (mainFile) {
-                            openExistingInCropper(
-                              URL.createObjectURL(mainFile),
-                              "main",
-                            );
-                          } else if (editingChar?.image_url) {
-                            openExistingInCropper(
-                              editingChar.image_url,
-                              "main",
-                            );
-                          } else {
-                            document.getElementById("mainFile")?.click();
-                          }
-                        }}
-                      >
-                        {!mainFile && !editingChar?.image_url && (
-                          <span>CLICK TO UPLOAD</span>
-                        )}
-                        {(mainFile || editingChar?.image_url) && (
-                          <img
-                            src={
-                              mainFile
-                                ? URL.createObjectURL(mainFile)
-                                : editingChar?.image_url ||
-                                  "/placeholder-bg.png"
-                            }
-                            alt="Preview"
-                          />
-                        )}
-                        <input
-                          type="file"
-                          id="mainFile"
-                          hidden
-                          onChange={(e) => onFileSelect(e, "main")}
-                        />
-                      </div>
-                      <div className={styles.actionRow}>
-                        {(mainFile || editingChar?.image_url) && (
-                          <button
-                            type="button"
-                            className={styles.clearBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              clearImage("main");
-                            }}
-                          >
-                            REMOVE
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className={styles.fieldLabel}>SYSTEM ICON</label>
-                    <div className={styles.dropZoneContainer}>
-                      <div
-                        className={styles.dropZoneSmall}
-                        onClick={() => {
-                          if (iconFile) {
-                            openExistingInCropper(
-                              URL.createObjectURL(iconFile),
-                              "icon",
-                            );
-                          } else if (editingChar?.icon_url) {
-                            openExistingInCropper(editingChar.icon_url, "icon");
-                          } else {
-                            document.getElementById("iconFile")?.click();
-                          }
-                        }}
-                      >
-                        {!iconFile && !editingChar?.icon_url && (
-                          <span style={{ fontSize: 10 }}>CLICK TO UPLOAD</span>
-                        )}
-                        {(iconFile || editingChar?.icon_url) && (
-                          <img
-                            src={
-                              iconFile
-                                ? URL.createObjectURL(iconFile)
-                                : editingChar?.icon_url ||
-                                  "/placeholder-icon.png"
-                            }
-                            alt="Preview"
-                          />
-                        )}
-                        <input
-                          type="file"
-                          id="iconFile"
-                          hidden
-                          onChange={(e) => onFileSelect(e, "icon")}
-                        />
-                      </div>
-
-                      <div className={styles.actionRow}>
-                        {(iconFile || editingChar?.icon_url) && (
-                          <button
-                            type="button"
-                            className={styles.clearBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              clearImage("icon");
-                            }}
-                          >
-                            REMOVE
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* RIGHT COLUMN: DATA */}
-                <div className={styles.formMain}>
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label className={styles.fieldLabel}>SUBJECT NAME</label>
-                      <input
-                        name="name"
-                        defaultValue={editingChar?.name}
-                        className={styles.inputField}
-                        required
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label className={styles.fieldLabel}>
-                        ROLE DESIGNATION
-                      </label>
-                      <select
-                        name="role"
-                        defaultValue={editingChar?.role || "0"}
-                        className={styles.inputField}
-                      >
-                        {Object.entries(ROLE_MAP).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <label className={styles.fieldLabel}>DESIGNATED QUOTE</label>
-                  <textarea
-                    name="quote"
-                    defaultValue={editingChar?.quote}
-                    className={styles.inputField}
-                    rows={2}
-                  />
-
-                  <div className={styles.statsSection}>
-                    <h4 className={styles.sectionDivider}>
-                      VITAL STATISTICS INITIALIZATION
-                    </h4>
-                    <div className={styles.statsGrid}>
-                      <div>
-                        <label className={styles.fieldLabel}>GENDER</label>
-                        <select
-                          name="gender"
-                          defaultValue={editingChar?.stats?.[0]?.gender ?? "1"}
-                          className={styles.inputField}
-                        >
-                          {Object.entries(GENDER_MAP).map(([value, label]) => (
-                            <option key={value} value={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className={styles.fieldLabel}>SPECIES</label>
-                        <input
-                          name="species"
-                          defaultValue={editingChar?.stats?.[0]?.species}
-                          className={styles.inputField}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.fieldLabel}>AGE</label>
-                        <input
-                          name="age"
-                          defaultValue={editingChar?.stats?.[0]?.age}
-                          className={styles.inputField}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.fieldLabel}>HEIGHT (CM)</label>
-                        <input
-                          type="number"
-                          name="height"
-                          defaultValue={editingChar?.stats?.[0]?.height
-                            ?.toString()
-                            .replace(/\D/g, "")}
-                          placeholder="e.g. 175"
-                          className={styles.inputField}
-                        />
-                      </div>
-                      <div>
-                        {/* BIRTHDAY LOGIC */}
-                        {(() => {
-                          const bday = editingChar?.stats?.[0]?.birthday; // e.g., "2000-12-21"
-                          const [_, month, day] = bday
-                            ? bday.split("-")
-                            : ["", "01", "01"];
-
-                          return (
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "10px",
-                                gridColumn: "span 2",
-                              }}
-                            >
-                              <div style={{ flex: 2 }}>
-                                <label className={styles.fieldLabel}>
-                                  BIRTHDAY MONTH
-                                </label>
-                                <select
-                                  name="birth_month"
-                                  defaultValue={month}
-                                  className={styles.inputField}
-                                >
-                                  {Array.from({ length: 12 }, (_, i) => (
-                                    <option
-                                      key={i + 1}
-                                      value={String(i + 1).padStart(2, "0")}
-                                    >
-                                      {new Date(2000, i)
-                                        .toLocaleString("default", {
-                                          month: "long",
-                                        })
-                                        .toUpperCase()}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <label className={styles.fieldLabel}>DAY</label>
-                                <select
-                                  name="birth_day"
-                                  defaultValue={day}
-                                  className={styles.inputField}
-                                >
-                                  {Array.from({ length: 31 }, (_, i) => (
-                                    <option
-                                      key={i + 1}
-                                      value={String(i + 1).padStart(2, "0")}
-                                    >
-                                      {i + 1}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                      <div>
-                        <label className={styles.fieldLabel}>
-                          VITAL STATUS
-                        </label>
-                        <select
-                          name="status"
-                          defaultValue={editingChar?.stats?.[0]?.status ?? "1"}
-                          className={styles.inputField}
-                        >
-                          {Object.entries(STATUS_MAP).map(([value, label]) => (
-                            <option key={value} value={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      {/* TODO Dimension and Organization may need database, 
-                            currently i dont have plan on their names and details
-                            so i not going to save them first 
-                        */}
-                      {/* <div style={{ gridColumn: "span 2" }}>
-                          <label className={styles.fieldLabel}>DIMENSION OF ORIGIN</label>
-                          <input
-                            name="dimension"
-                            defaultValue={editingChar?.stats?.[0]?.dimension}
-                            className={styles.inputField}
-                          />
-                        </div> */}
-                    </div>
-                    {/* <div style={{ gridColumn: "span 2" }}>
-                        <label className={styles.fieldLabel}>ORGANIZATIONAL AFFILIATION</label>
-                        <input
-                          name="affiliation"
-                          defaultValue={editingChar?.stats?.[0]?.affiliation}
-                          className={styles.inputField}
-                        />
-                      </div> */}
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.modalActions}>
-                <button
-                  type="submit"
-                  className={styles.saveBtn}
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <span className={styles.loadingFlex}>SYNCING...</span>
-                  ) : (
-                    "SYNCHRONIZE"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingChar(null);
-                    setShowAddForm(false);
-                    setIconFile(null);
-                    setMainFile(null);
-                  }}
-                  className={styles.closeBtn}
-                >
-                  ABORT
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CharacterForm
+          editingChar={editingChar}
+          showAddForm={showAddForm}
+          isSaving={isSaving}
+          mainFile={mainFile}
+          iconFile={iconFile}
+          onFileSelect={onFileSelect}
+          openExistingInCropper={openExistingInCropper}
+          clearImage={clearImage}
+          handleSave={handleSave}
+          onClose={() => {
+            setEditingChar(null);
+            setShowAddForm(false);
+            setIconFile(null);
+            setMainFile(null);
+          }}
+        />
       )}
     </>
   );

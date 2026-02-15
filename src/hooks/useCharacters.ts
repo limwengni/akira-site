@@ -21,6 +21,13 @@ export const useCharacters = () => {
     mainFile: File | null,
     iconFile: File | null,
     onSuccess: () => void,
+    extraData?: {
+      abilities: string;
+      relationships: string;
+      trivias: string;
+      labels: string[];
+      galleryFiles: File[];
+    },
   ) => {
     e.preventDefault();
     if (isSaving) return; // Prevent multiple saves
@@ -52,6 +59,11 @@ export const useCharacters = () => {
       name: data.name,
       role: parseInt(data.role as string),
       quote: data.quote,
+      bio: data.bio,
+      abilities: extraData?.abilities,
+      relationships: extraData?.relationships,
+      trivias: extraData?.trivias,
+      labels: extraData?.labels,
       image_url: tempMainUrl,
       icon_url: tempIconUrl,
       slug: currentSlug,
@@ -98,6 +110,16 @@ export const useCharacters = () => {
         }
       }
 
+      let galleryUrls = editingChar?.gallery || [];
+      if (extraData?.galleryFiles && extraData.galleryFiles.length > 0) {
+        // Loop and upload each gallery file to the /gallery/ folder
+        const uploadPromises = extraData.galleryFiles.map((file) =>
+          characterService.uploadImage(file, currentSlug, "gallery"),
+        );
+        const newGalleryUrls = await Promise.all(uploadPromises);
+        galleryUrls = [...galleryUrls, ...newGalleryUrls];
+      }
+
       // --- Existing character but their images were cleared ---
       if (!isNew) {
         // Find the original data from your list to see what the URL WAS before editing
@@ -127,6 +149,12 @@ export const useCharacters = () => {
         quote: data.quote,
         role: parseInt(data.role as string),
         slug: currentSlug,
+        bio: data.bio,
+        abilities: extraData?.abilities,
+        relationships: extraData?.relationships,
+        trivias: extraData?.trivias,
+        labels: extraData?.labels,
+        gallery: galleryUrls,
       };
 
       // Format birthday to YYYY-MM-DD if possible (using dummy year 2000)
@@ -163,8 +191,12 @@ export const useCharacters = () => {
         } else {
           alert("Character saved successfully!");
         }
-      } catch (dbError) {
-        alert("Failed to save character data. Please try again.");
+      } catch (dbError: any) {
+        console.error("DATABASE ERROR:", dbError); // Check F12 console for this!
+        alert(
+          "Failed to save character data: " +
+            (dbError.message || "Unknown Error"),
+        );
       }
 
       const freshData = await characterService.fetchAllCharacters();
@@ -184,14 +216,14 @@ export const useCharacters = () => {
   };
 
   const handleDelete = async (id: number, slug: string) => {
-    if (!confirm("CONFIRM DELETION?")) return;
+    if (!confirm(`CONFIRM PERMANENT DELETION OF ${slug.toUpperCase()}?`)) return;
 
     const originalList = [...charList];
     setCharList((prev) => prev.filter((c) => c.id !== id));
 
     try {
       await characterService.delete(id, slug);
-      console.log("Character deleted successfully.");
+      alert("Character deleted successfully.");
     } catch (err: any) {
       console.error("Deletion failed:", err);
       alert("Deletion Error: " + err.message);

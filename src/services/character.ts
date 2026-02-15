@@ -8,36 +8,42 @@ export const characterService = {
       .order("name", { ascending: true });
   },
 
-  async uploadImage(file: File, folder: string, type: "main" | "icon") {
-    // A. CLEANUP: Find and delete any existing file of this type
-    // List all files in the character's folder
-    const { data: existingFiles } = await supabase.storage
-      .from("character-assets")
-      .list(folder);
+  uploadImage: async (file: File, slug: string, type: string) => {
+    const isGallery = type.startsWith("gallery");
+    const folder = slug; // e.g., "hikaru"
 
-    if (existingFiles && existingFiles.length > 0) {
-      // Find files that start with "main-" or "icon-"
-      const filesToDelete = existingFiles
-        .filter((f) => f.name.startsWith(`${type}-`))
-        .map((f) => `${folder}/${f.name}`); // Construct full path
+    // A. CLEANUP (Only for Main/Icon)
+    // We don't want to delete gallery files whenever we upload a new one!
+    if (!isGallery) {
+      const { data: existingFiles } = await supabase.storage
+        .from("character-assets")
+        .list(folder);
 
-      if (filesToDelete.length > 0) {
-        console.log(`🗑️ DELETING ONLY '${type}' FILES:`, filesToDelete);
+      if (existingFiles && existingFiles.length > 0) {
+        const filesToDelete = existingFiles
+          .filter((f) => f.name.startsWith(`${type}-`))
+          .map((f) => `${folder}/${f.name}`);
 
-        const { error: removeError } = await supabase.storage
-          .from("character-assets")
-          .remove(filesToDelete);
-
-        if (removeError) console.error("Remove failed:", removeError);
-      } else {
-        console.log(`✅ No old '${type}' images found to delete. Safe.`);
+        if (filesToDelete.length > 0) {
+          await supabase.storage.from("character-assets").remove(filesToDelete);
+        }
       }
     }
 
-    // B. UPLOAD: Now upload the new one
+    // B. UPLOAD LOGIC
     const fileExt = file.name.split(".").pop();
-    const fileName = `${type}-${Date.now()}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
+    let filePath = "";
+
+    if (isGallery) {
+      // If it's a gallery file, we keep the original name but add a timestamp to avoid cache issues
+      // Path: hikaru/gallery/123456789-my-art.png
+      const cleanFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension from original name
+      filePath = `${folder}/gallery/${Date.now()}-${cleanFileName}.${fileExt}`;
+    } else {
+      // Standard Main/Icon logic
+      // Path: hikaru/main-123456789.png
+      filePath = `${folder}/${type}-${Date.now()}.${fileExt}`;
+    }
 
     const { error } = await supabase.storage
       .from("character-assets")
@@ -116,17 +122,26 @@ export const characterService = {
   },
 
   async delete(id: number, slug: string) {
-    const { data: list } = await supabase.storage
-      .from("character-assets")
-      .list(slug); // List everything inside the 'slug' folder
+    // 1. CLEANUP STORAGE
+    const foldersToClean = [slug, `${slug}/gallery`];
 
-    if (list && list.length > 0) {
-      const filesToRemove = list.map((x) => `${slug}/${x.name}`);
-      await supabase.storage.from("character-assets").remove(filesToRemove);
+    for (const folderPath of foldersToClean) {
+      const { data: list } = await supabase.storage
+        .from("character-assets")
+        .list(folderPath);
+
+      if (list && list.length > 0) {
+        const filesToRemove = list
+          .filter((x) => x.name !== ".emptyKeep")
+          .map((x) => `${folderPath}/${x.name}`);
+
+        if (filesToRemove.length > 0) {
+          await supabase.storage.from("character-assets").remove(filesToRemove);
+        }
+      }
     }
 
-    // 2. Delete from Database
-    // Because of "Cascade", deleting the Character automatically deletes their Stats!
+    // 2. DELETE FROM DATABASE
     const { error } = await supabase.from("characters").delete().eq("id", id);
 
     if (error) throw error;
