@@ -258,7 +258,7 @@ export const CharacterForm = ({
                 ? "// INITIALIZING NEW ENTRY"
                 : `// EDITING: ${editingChar?.name}`}
             </h3>
-            <span className={styles.stepIndicator}>STEP {formStep} / 3</span>
+            {/* <span className={styles.stepIndicator}>STEP {formStep} / 3</span> */}
           </div>
 
           <nav className={styles.formNav}>
