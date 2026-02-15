@@ -157,6 +157,21 @@ export default function Home() {
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  useEffect(() => {
+    if (editingChar || showAddForm) {
+      // Freeze the body
+      document.body.style.overflow = "hidden";
+    } else {
+      // Unfreeze when closed
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup: Always unfreeze when component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [editingChar, showAddForm]);
   //#endregion
 
   return (
@@ -387,7 +402,7 @@ export default function Home() {
               crop={crop}
               zoom={zoom}
               // ICON = Force Square (1), MAIN = Free (2 / 3)
-              aspect={editingTarget === "icon" ? 1 : 2 / 3}
+              aspect={editingTarget === "icon" ? 1 : 1 / 1.2}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={(_, croppedPixels) =>
@@ -574,7 +589,7 @@ export default function Home() {
                 {/* RIGHT COLUMN: DATA */}
                 <div className={styles.formMain}>
                   <div className={styles.formRow}>
-                    <div style={{ flex: 2 }}>
+                    <div className={styles.formGroup}>
                       <label className={styles.fieldLabel}>SUBJECT NAME</label>
                       <input
                         name="name"

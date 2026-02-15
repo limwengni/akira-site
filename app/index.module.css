@@ -670,6 +670,10 @@
   gap: 15px;
 }
 
+.formGroup {
+  flex: 2;
+}
+
 /* Dropzones */
 .dropZoneContainer {
   position: relative;
@@ -706,8 +710,8 @@
 }
 
 .dropZoneSmall {
-  width: 60px;
-  height: 60px;
+  width: 100px;
+  height: 100px;
   border: 2px dashed #ccc;
   cursor: pointer;
   overflow: hidden;
@@ -1269,10 +1273,6 @@ select.inputField {
     gap: 20px;
   }
 
-  .imgWrap {
-    aspect-ratio: 1 / 1;
-  }
-
   .theEnd {
     font-size: 1.8rem;
   }
@@ -1292,7 +1292,14 @@ select.inputField {
 
   .formSidebar {
     max-width: 100%;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: start;
+  }
+
+  .formSidebar .dropZoneContainer {
+    width: 100%;
   }
 
   .statsGrid {
@@ -1363,7 +1370,7 @@ select.inputField {
     box-shadow: 4px 4px 0px #000;
   }
 
-  .imgWrap {
-    aspect-ratio: 1 / 1;
+  .formGroup {
+    flex: 1;
   }
 }
