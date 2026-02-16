@@ -988,10 +988,10 @@ export const CharacterForm = ({
               <>
                 <button
                   type="button"
-                  onClick={() => setFormStep(1)}
+                  onClick={onClose}
                   className={styles.closeBtn}
                 >
-                  BACK
+                  ABORT
                 </button>
                 <button
                   type="button"
@@ -1011,10 +1011,10 @@ export const CharacterForm = ({
               <>
                 <button
                   type="button"
-                  onClick={() => setFormStep(2)}
+                  onClick={onClose}
                   className={styles.closeBtn}
                 >
-                  BACK
+                  ABORT
                 </button>
                 <button
                   type="submit"

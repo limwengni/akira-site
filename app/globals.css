@@ -6,11 +6,12 @@
   --surface: #ffffff;
   --text: #1a1a1a;
   --text-dim: #999;
-  --accent-pro: #2563eb;
-  --accent-ant: #dc2626;
   --border: #e2e2e5;
-  --error-color: #ff4d4d;
+  --border-dark: #000;
   --screentone-grey: #cccccc;
+  --info-color: #2563eb;
+  --warn-color: #fca311;
+  --error-color: #d00;
 
   --font-display: var(--font-rubik), sans-serif;
   --font-sub: var(--font-rubik), monospace;

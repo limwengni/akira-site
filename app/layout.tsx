@@ -27,12 +27,16 @@ export default function RootLayout({
     { id: "01", label: "Introduction", href: "/" },
     { id: "02", label: "Characters", href: "/characters" },
     // { id: "03", label: "World Lore", href: "/world-lore" },
-    // { id: "04", label: "Archive", href: "/archive" },
-    // { id: "05", label: "About the Artist", href: "/about" },
+    // { id: "04", label: "About the Artist", href: "/about" },
+    // { id: "05", label: "Archive", href: "/archive" },
   ];
 
   const onLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      return;
+    }
     const result = await login(email, password);
     if (result.success) setShowLogin(false);
   };
@@ -96,25 +100,40 @@ export default function RootLayout({
         {/* Login Modal */}
         {showLogin && (
           <div className={styles.modalOverlay}>
-            <div className={styles.modalBox}>
-              <h3>Admin Login</h3>
+            <div className={styles.modalContent}>
+              <header className={styles.modalHeader}>
+                <h3>ADMIN ACCESS</h3>
+              </header>
               <form onSubmit={onLoginSubmit}>
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder="Admin Email"
+                  className={styles.inputField}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
+                <div style={{ paddingBottom: "15px" }}></div>
                 <input
                   type="password"
                   placeholder="Password"
+                  className={styles.inputField}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
-                <button type="submit">Login</button>
-                <button type="button" onClick={() => setShowLogin(false)}>
-                  Cancel
-                </button>
+                <div className={styles.modalActions}>
+                  <button type="submit" className={styles.saveBtn}>
+                    Unlock
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.closeBtn}
+                    onClick={() => setShowLogin(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </form>
             </div>
           </div>
@@ -123,10 +142,22 @@ export default function RootLayout({
         {/* Logout Modal */}
         {showLogout && (
           <div className={styles.modalOverlay}>
-            <div className={styles.modalBox}>
-              <h3>Confirm Logout</h3>
-              <button onClick={onLogoutSubmit}>Logout</button>
-              <button onClick={() => setShowLogout(false)}>Cancel</button>
+            <div className={styles.modalContent}>
+              <header className={styles.modalHeader}>
+                <h3>CONFIRM LOGOUT</h3>
+              </header>
+              <p>Are you sure you want to logout?</p>
+              <div className={styles.modalActions}>
+                <button className={styles.saveBtn} onClick={onLogoutSubmit}>
+                  Confirm
+                </button>
+                <button
+                  className={styles.closeBtn}
+                  onClick={() => setShowLogout(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
