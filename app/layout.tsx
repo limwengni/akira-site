@@ -16,6 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isCharacterProfile =
+    pathname?.startsWith("/characters/") && pathname !== "/characters";
+
   const { isLoggedIn, login, logout } = useAuth();
 
   const [showLogin, setShowLogin] = useState(false);
@@ -47,52 +50,55 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <div className={styles.outerViewport}>
           <div id="mangaPage" className={styles.pageContainer}>
             <div className={styles.halftoneBg}></div>
             <div className={styles.contentWrapper}>
-              <Header />
+              {!isCharacterProfile && <Header />}
 
-              <main className={styles.mainGrid}>
-                {/* SHARED SIDEBAR */}
-                <aside className={styles.sidebar}>
-                  <MangaPanel
-                    title="CONTENTS"
-                    dark
-                    collapsible={true}
-                    defaultOpen={true}
-                  >
-                    <nav className={styles.navLinks}>
-                      {menuItems.map((item) => (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          className={`${styles.navItem} ${
-                            pathname === item.href ? styles.activeNavItem : ""
-                          }`}
-                        >
-                          <span>
-                            {item.id}. {item.label}
-                          </span>
-                        </Link>
-                      ))}
-                    </nav>
-                  </MangaPanel>
+              <main className={isCharacterProfile ? "" : styles.mainGrid}>
+                {!isCharacterProfile && (
+                  <aside className={styles.sidebar}>
+                    <MangaPanel
+                      title="CONTENTS"
+                      dark
+                      collapsible={true}
+                      defaultOpen={true}
+                    >
+                      <nav className={styles.navLinks}>
+                        {menuItems.map((item) => (
+                          <Link
+                            key={item.id}
+                            href={item.href}
+                            className={`${styles.navItem} ${
+                              pathname === item.href ? styles.activeNavItem : ""
+                            }`}
+                          >
+                            <span>
+                              {item.id}. {item.label}
+                            </span>
+                          </Link>
+                        ))}
+                      </nav>
+                    </MangaPanel>
 
-                  <div id="page-sidebar-slot"></div>
-                </aside>
+                    <div id="page-sidebar-slot"></div>
+                  </aside>
+                )}
 
                 {/* PAGE-SPECIFIC CONTENT */}
                 {children}
               </main>
 
-              <Footer
-                isLoggedIn={isLoggedIn}
-                onOpenLogout={() => setShowLogout(true)}
-                onOpenLogin={() => setShowLogin(true)}
-              />
+              {!isCharacterProfile && (
+                <Footer
+                  isLoggedIn={isLoggedIn}
+                  onOpenLogout={() => setShowLogout(true)}
+                  onOpenLogin={() => setShowLogin(true)}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -40,7 +40,7 @@ export const CharacterCard = ({
       )}
 
       <div className={styles.imgWrapContainer}>
-        <Link href={`/profile/${char.slug}`} className={styles.imgWrap}>
+        <Link href={`/characters/${char.slug}`} className={styles.imgWrap}>
           <img
             src={`${char.image_url}?width=600&height=900&resize=cover`}
             alt={char.name}
