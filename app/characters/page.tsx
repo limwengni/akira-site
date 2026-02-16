@@ -257,7 +257,8 @@ export default function Characters() {
               crop={crop}
               zoom={zoom}
               // ICON = Force Square (1), MAIN = Free (2 / 3)
-              aspect={editingTarget === "icon" ? 1 : 1 / 1.2}
+              // aspect={editingTarget === "icon" ? 1 : 1 / 1.2}
+              aspect={1 / 1.2}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={(_, croppedPixels) =>
