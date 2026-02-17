@@ -4,14 +4,20 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import styles from "../../index.module.css";
 import { useCharacters } from "@/src/hooks/useCharacters";
-import { STATUS_MAP, GENDER_MAP } from "@/src/constants/character";
+import {
+  STATUS_MAP,
+  GENDER_MAP,
+  getRoleLabel,
+} from "@/src/constants/character";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function CharacterProfile() {
   const params = useParams();
   const router = useRouter();
   const [character, setCharacter] = useState<any>(null);
   const [notFound, setNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("bio");
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const { charList, loading: charLoading, fetchCharacters } = useCharacters();
 
   useEffect(() => {
@@ -57,462 +63,196 @@ export default function CharacterProfile() {
 
   if (charLoading || (charList.length === 0 && !notFound)) {
     return (
-      <div className={styles.loadingOverlay}>
-        <div className={styles.loaderBox}>
-          <div className={styles.spinner}></div>
-          <p>ACCESSING RECORDS...</p>
-        </div>
+      <div className={styles.profileLoading}>
+        <div className={styles.spinner}></div>
+        <p>ACCESSING RECORDS...</p>
       </div>
     );
   }
 
   if (notFound || (!character && !charLoading)) {
     return (
-      <div
-        className={styles.pagePanel}
-        style={{ textAlign: "center", padding: "50px" }}
-      >
-        ERROR: FILE MISSING
+      <div className={styles.profileError}>
+        <h2>ERROR 404</h2>
+        <p>FILE NOT FOUND</p>
+        <button onClick={() => router.push("/characters")}>
+          RETURN TO ARCHIVE
+        </button>
       </div>
     );
   }
 
   const charStats = character?.stats?.[0] || {};
-  const roleColor =
-    character.role === 2 ? "var(--error-color)" : "var(--accent-pro)";
 
-  const tabs = [
-    { id: "bio", label: "I", color: "var(--warn-color)", show: true },
-    {
-      id: "abilities",
-      label: "II",
-      color: "var(--error-color)",
-      show: !!character.abilities,
-    },
-    {
-      id: "relationships",
-      label: "III",
-      color: "var(--info-color)",
-      show: !!character.relationships,
-    },
-    {
-      id: "trivias",
-      label: "IV",
-      color: "var(--screentone-grey)",
-      show: !!character.trivias,
-    },
-  ].filter((tab) => tab.show);
+  // Determine available pages
+  const pages = [
+    { num: 1, label: "BIO", available: true },
+    { num: 2, label: "ABILITIES", available: !!character.abilities },
+    { num: 3, label: "RELATIONSHIPS", available: !!character.relationships },
+    { num: 4, label: "TRIVIA", available: !!character.trivias },
+  ].filter((page) => page.available);
 
   return (
-    <>
-      <section
-        className={styles.mainContent}
-        style={{
-          padding: "20px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          fontFamily: "sans-serif",
-        }}
-      >
-        <div className={styles.folderContainer}>
-          <div className={styles.leftColumn}>
-            {/* ====== LEFT SIDE: ACTION SHOTS & ART ====== */}
-            {/* <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                color: "rgba(255,255,255,0.2)",
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
-              [IMAGE DATA PENDING]
-            </div> */}
-          </div>
+    <div className={styles.profileWrapper}>
+      <div className={styles.profileContainer}>
+        {/* LEFT SIDE - GALLERY (Empty for now) */}
+        <div className={styles.profileLeft}>
+          <div className={styles.galleryPlaceholder}>[GALLERY PENDING]</div>
+        </div>
 
-          <div className={styles.rightColumn}>
-            {/* ====== RIGHT SIDE: NOTEBOOK DATA PAGE ====== */}
-            {/* Notebook Binder Holes (Left Side) */}
-            <div
-              style={{
-                position: "absolute",
-                left: "20px",
-                top: "40px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "35px",
-              }}
-            >
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    borderRadius: "50%",
-                    backgroundColor: "#333",
-                  }}
-                ></div>
-              ))}
-            </div>
+        {/* RIGHT SIDE - CHARACTER DATA */}
+        <div className={styles.profileRight}>
+          {/* Close Button */}
+          <button
+            className={styles.profileCloseBtn}
+            onClick={() => router.push("/characters")}
+          >
+            <FontAwesomeIcon icon={faClose} />
+          </button>
 
-            <div
-              style={{
-                position: "absolute",
-                left: "20px",
-                bottom: "40px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "35px",
-              }}
-            >
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    borderRadius: "50%",
-                    backgroundColor: "#333",
-                  }}
-                ></div>
-              ))}
-            </div>
-            <div
-              style={{ position: "relative", padding: "50px 30px 100px 40px" }}
-            >
-              {/* === CONTENT: TAB 1 (BIO PAGE) === */}
-              {activeTab === "bio" && (
-                <>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "25px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "140px",
-                        height: "180px",
-                        border: "3px solid #000",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <img
-                        src={character.icon_url || "/placeholder.png"}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "contain",
-                        }}
-                        alt="icon"
-                      />
-                    </div>
-
-                    <div style={{ flex: 1, fontFamily: "monospace" }}>
-                      <h1
-                        style={{
-                          fontSize: "2rem",
-                          color: "#000",
-                          textTransform: "uppercase",
-                          lineHeight: "1",
-                          textAlign: "right",
-                          marginBottom: "15px",
-                        }}
-                      >
-                        {character.name}
-                      </h1>
-                      {[
-                        {
-                          label: "STATUS",
-                          value: STATUS_MAP[charStats.status] || "UNKNOWN",
-                          color:
-                            charStats.status === 2
-                              ? "var(--error-color)"
-                              : "var(--accent-pro)",
-                        },
-                        {
-                          label: "GENDER",
-                          value: GENDER_MAP[charStats.gender] || "UNKNOWN",
-                        },
-                        {
-                          label: "BIRTHDAY",
-                          value: formatBirthday(charStats.birthday),
-                        },
-                      ].map((item, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            borderBottom: "1px dashed #ccc",
-                            padding: "6px 0",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <span style={{ fontWeight: "bold" }}>
-                            {item.label}:
-                          </span>
-                          <span style={{ color: item.color || "inherit" }}>
-                            {item.value}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* SECONDARY STATS BAR */}
-                  <div
-                    style={{
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: "8px",
-                      padding: "15px 20px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "0.85rem",
-                      marginBottom: "20px",
-                      border: "1px solid #ddd",
-                    }}
-                  >
-                    <div>
-                      <span
-                        style={{
-                          color: "#888",
-                          display: "block",
-                          fontSize: "0.7rem",
-                        }}
-                      >
-                        AGE
-                      </span>
-                      <b>{charStats.age || "???"}</b>
-                    </div>
-                    <div>
-                      <span
-                        style={{
-                          color: "#888",
-                          display: "block",
-                          fontSize: "0.7rem",
-                        }}
-                      >
-                        HEIGHT
-                      </span>
-                      <b>
-                        {charStats.height ? `${charStats.height}cm` : "???cm"}
-                      </b>
-                    </div>
-                    <div>
-                      <span
-                        style={{
-                          color: "#888",
-                          display: "block",
-                          fontSize: "0.7rem",
-                        }}
-                      >
-                        SPECIES
-                      </span>
-                      <b>{charStats.species || "UNKNOWN"}</b>
-                    </div>
-                  </div>
-
-                  {/* MAIN CONTENT SECTIONS */}
-                  <div
-                    style={{
-                      fontSize: "0.95rem",
-                      lineHeight: "1.6",
-                      color: "#1a1a1a",
-                    }}
-                  >
-                    <div style={{ marginBottom: "30px" }}>
-                      <h3
-                        style={{
-                          borderBottom: "2px solid #000",
-                          display: "inline-block",
-                          marginBottom: "10px",
-                          fontSize: "1rem",
-                        }}
-                      >
-                        BIOGRAPHY
-                      </h3>
-                      {character.bio ? (
-                        <div
-                          dangerouslySetInnerHTML={renderHTML(character.bio)}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            fontStyle: "italic",
-                            color: "#888",
-                            fontFamily: "monospace",
-                          }}
-                        >
-                          [NO RECORDS FOUND]
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* === CONTENT: TAB 2 (ABILITIES) === */}
-              {activeTab === "abilities" && (
-                <div
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.6",
-                    color: "#1a1a1a",
-                    animation: "fadeIn 0.3s",
-                  }}
-                >
-                  {character.abilities && (
-                    <div style={{ marginBottom: "30px" }}>
-                      <h3
-                        style={{
-                          borderBottom: "2px solid #000",
-                          display: "inline-block",
-                          marginBottom: "10px",
-                          fontSize: "1rem",
-                        }}
-                      >
-                        ABILITIES
-                      </h3>
-                      <div
-                        dangerouslySetInnerHTML={renderHTML(
-                          character.abilities,
-                        )}
-                      />
-                    </div>
-                  )}
+          {/* PAGE 1: BIO */}
+          {currentPage === 1 && (
+            <div className={styles.profilePage}>
+              {/* Header with Name */}
+              <div className={styles.profileHeader}>
+                <h1>{character.name}</h1>
+                <div className={styles.profileRole}>
+                  {getRoleLabel(character.role)}
                 </div>
-              )}
-
-              {/* === CONTENT: TAB 3 (RELATIONSHIPS) === */}
-              {activeTab === "relationships" && (
-                <div
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.6",
-                    color: "#1a1a1a",
-                    animation: "fadeIn 0.3s",
-                  }}
-                >
-                  {character.relationships && (
-                    <div style={{ marginBottom: "30px" }}>
-                      <h3
-                        style={{
-                          borderBottom: "2px solid #000",
-                          display: "inline-block",
-                          marginBottom: "10px",
-                          fontSize: "1rem",
-                        }}
-                      >
-                        RELATIONSHIPS
-                      </h3>
-                      <div
-                        dangerouslySetInnerHTML={renderHTML(
-                          character.relationships,
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* === CONTENT: TAB 4 (TRIVIAS) === */}
-              {activeTab === "trivias" && (
-                <div
-                  style={{
-                    fontSize: "0.95rem",
-                    lineHeight: "1.6",
-                    color: "#1a1a1a",
-                    animation: "fadeIn 0.3s",
-                  }}
-                >
-                  {character.trivias && (
-                    <div
-                      style={{
-                        fontSize: "0.75rem",
-                        background: "#fff9c4",
-                        padding: "20px",
-                        transform: "rotate(1deg)",
-                        border: "1px solid #e6db55",
-                        boxShadow: "5px 5px 0 rgba(0,0,0,0.05)",
-                        fontFamily: "'Courier New', Courier, monospace",
-                        color: "#5d4037",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <b
-                        style={{
-                          color: "#333",
-                          display: "block",
-                          marginBottom: "5px",
-                          textDecoration: "underline",
-                        }}
-                      >
-                        FIELD NOTES / TRIVIA:
-                      </b>
-                      <div
-                        className={styles.triviaContent}
-                        dangerouslySetInnerHTML={renderHTML(character.trivias)}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* === BOOKMARK STICKERS (Right Side) === */}
-          <div className={styles.tabsContainer}>
-            {tabs.map((tab) => (
-              <div
-                key={tab.id}
-                className={styles.bookmark}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  width: activeTab === tab.id ? "55px" : "40px",
-                  height: "45px",
-                  backgroundColor: tab.color,
-                  borderRadius: "4px", // Simple radius for both orientations
-                  boxShadow: "2px 2px 5px rgba(0,0,0,0.2)",
-                  border: "1px solid rgba(0,0,0,0.1)",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "rgba(0,0,0,0.3)",
-                  fontWeight: "bold",
-                }}
-              >
-                {activeTab === tab.id && tab.label}
               </div>
+
+              {/* Character Image & Quick Stats */}
+              <div className={styles.profileTop}>
+                <div className={styles.profileImageBox}>
+                  <img
+                    src={
+                      character.icon_url ||
+                      character.image_url ||
+                      "/placeholder.png"
+                    }
+                    alt={character.name}
+                  />
+                </div>
+
+                <div className={styles.profileQuickStats}>
+                  <div className={styles.statRow}>
+                    <span className={styles.statLabel}>STATUS:</span>
+                    <span className={styles.statValue}>
+                      {STATUS_MAP[charStats.status] || "UNKNOWN"}
+                    </span>
+                  </div>
+                  <div className={styles.statRow}>
+                    <span className={styles.statLabel}>GENDER:</span>
+                    <span className={styles.statValue}>
+                      {GENDER_MAP[charStats.gender] || "UNKNOWN"}
+                    </span>
+                  </div>
+                  <div className={styles.statRow}>
+                    <span className={styles.statLabel}>BIRTHDAY:</span>
+                    <span className={styles.statValue}>
+                      {formatBirthday(charStats.birthday)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secondary Stats */}
+              <div className={styles.profileSecondaryStats}>
+                <div className={styles.statBox2}>
+                  <div className={styles.statBoxLabel}>AGE</div>
+                  <div className={styles.statBoxValue}>
+                    {charStats.age || "???"}
+                  </div>
+                </div>
+                <div className={styles.statBox2}>
+                  <div className={styles.statBoxLabel}>HEIGHT</div>
+                  <div className={styles.statBoxValue}>
+                    {charStats.height ? `${charStats.height}cm` : "???"}
+                  </div>
+                </div>
+                <div className={styles.statBox2}>
+                  <div className={styles.statBoxLabel}>SPECIES</div>
+                  <div className={styles.statBoxValue}>
+                    {charStats.species || "UNKNOWN"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Biography */}
+              <div className={styles.profileSection}>
+                {character.bio ? (
+                  <div dangerouslySetInnerHTML={renderHTML(character.bio)} />
+                ) : (
+                  <p className={styles.noData}>[NO RECORDS FOUND]</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 2: ABILITIES */}
+          {currentPage === 2 && (
+            <div className={styles.profilePage}>
+              <div className={styles.profileSection}>
+                <h3>ABILITIES</h3>
+                {character.abilities ? (
+                  <div
+                    dangerouslySetInnerHTML={renderHTML(character.abilities)}
+                  />
+                ) : (
+                  <p className={styles.noData}>[NO RECORDS FOUND]</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 3: RELATIONSHIPS */}
+          {currentPage === 3 && (
+            <div className={styles.profilePage}>
+              <div className={styles.profileSection}>
+                <h3>RELATIONSHIPS</h3>
+                {character.relationships ? (
+                  <div
+                    dangerouslySetInnerHTML={renderHTML(
+                      character.relationships,
+                    )}
+                  />
+                ) : (
+                  <p className={styles.noData}>[NO RECORDS FOUND]</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 4: TRIVIA */}
+          {currentPage === 4 && (
+            <div className={styles.profilePage}>
+              <div className={styles.profileTrivia}>
+                <h3>TRIVIAS</h3>
+                {character.trivias ? (
+                  <div
+                    dangerouslySetInnerHTML={renderHTML(character.trivias)}
+                  />
+                ) : (
+                  <p className={styles.noData}>[NO RECORDS FOUND]</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Page Navigation */}
+          <div className={styles.profileNav}>
+            {pages.map((page) => (
+              <button
+                key={page.num}
+                className={`${styles.profileNavBtn} ${currentPage === page.num ? styles.active : ""}`}
+                onClick={() => setCurrentPage(page.num)}
+              >
+                {page.label}
+              </button>
             ))}
           </div>
-
-          {/* CLOSE BUTTON */}
-          <button
-            onClick={() => router.push("/characters")}
-            style={{
-              position: "absolute",
-              bottom: "20px",
-              right: "20px",
-              background: "#000",
-              color: "#fff",
-              border: "none",
-              padding: "10px 25px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              zIndex: 20
-            }}
-          >
-            CLOSE
-          </button>
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }

@@ -15,7 +15,7 @@ import { useImageCrop } from "@/src/hooks/useImageCrop";
 import { MangaPanel } from "@/src/components/MangaPanel";
 import { CharacterCard } from "@/src/components/CharacterCard";
 
-import { categoryLabels } from "@/src/constants/character";
+import { categoryLabels, ROLE_MAP } from "@/src/constants/character";
 import {
   faChevronLeft,
   faChevronRight,
@@ -107,6 +107,10 @@ export default function Characters() {
   };
 
   // This happens inside your component
+  const availableRoles = Object.entries(ROLE_MAP).filter(([roleNum]) =>
+    charList.some((char) => char.role === Number(roleNum)),
+  );
+
   const filteredCharacters = charList.filter((char) => {
     if (filter === "All") return true;
     if (filter === "Unclassified") return char.role === 0;
@@ -172,19 +176,24 @@ export default function Characters() {
           <h2 className={styles.pageHeader}>
             <span className={styles.pageTag}>PAGE 1</span>
             <div className={styles.filterGroup}>
-              {["All", "Unclassified", "Protagonist", "Antagonist"].map(
-                (category) => (
-                  <button
-                    key={category}
-                    onClick={() => setFilter(category)}
-                    className={
-                      filter === category ? styles.activeTab : styles.tab
-                    }
-                  >
-                    {categoryLabels[category]}
-                  </button>
-                ),
-              )}
+              <button
+                onClick={() => setFilter("All")}
+                className={filter === "All" ? styles.activeTab : styles.tab}
+              >
+                ALL
+              </button>
+
+              {availableRoles.map(([roleNum, roleLabel]) => (
+                <button
+                  key={roleNum}
+                  onClick={() => setFilter(roleLabel)}
+                  className={
+                    filter === roleLabel ? styles.activeTab : styles.tab
+                  }
+                >
+                  {roleLabel}
+                </button>
+              ))}
             </div>
           </h2>
 
