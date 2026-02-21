@@ -53,6 +53,8 @@ export default function Characters() {
   const [loading, setLoading] = useState(true);
 
   const [filter, setFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
 
@@ -122,6 +124,13 @@ export default function Characters() {
     return true;
   });
 
+  const totalPages = Math.ceil(filteredCharacters.length / itemsPerPage);
+
+  const paginatedCharacters = filteredCharacters.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
   useEffect(() => {
     loadInitialData();
   }, []);
@@ -177,10 +186,13 @@ export default function Characters() {
 
           {/* Page Header */}
           <h2 className={styles.pageHeader}>
-            <span className={styles.pageTag}>PAGE 1</span>
+            {/* <span className={styles.pageTag}>PAGE 1</span> */}
             <div className={styles.filterGroup}>
               <button
-                onClick={() => setFilter("all")}
+                onClick={() => {
+                  setFilter("all");
+                  setCurrentPage(1);
+                }}
                 className={filter === "all" ? styles.activeTab : styles.tab}
               >
                 ALL
@@ -189,7 +201,10 @@ export default function Characters() {
               {availableRoles.map(([roleNum, roleLabel]) => (
                 <button
                   key={roleNum}
-                  onClick={() => setFilter(roleLabel.toLowerCase())}
+                  onClick={() => {
+                    setFilter(roleLabel.toLowerCase());
+                    setCurrentPage(1);
+                  }}
                   className={
                     filter === roleLabel.toLowerCase()
                       ? styles.activeTab
@@ -204,7 +219,7 @@ export default function Characters() {
 
           {/* Character Grid */}
           <div className={styles.archiveGrid}>
-            {filteredCharacters?.map((char, index) => (
+            {paginatedCharacters?.map((char, index) => (
               <div key={char.id} className={styles.charEntryWrapper}>
                 <CharacterCard
                   char={char}
@@ -217,29 +232,49 @@ export default function Characters() {
           </div>
 
           {/* Pagination Footer */}
-          <div className={styles.paginationFooter}>
-            <button className={styles.pageBtn} disabled>
-              <FontAwesomeIcon
-                icon={faChevronLeft}
-                style={{ marginRight: "8px" }}
-              />
-              PREV
-            </button>
+          {totalPages > 1 && (
+            <div className={styles.paginationFooter}>
+              <button
+                className={styles.pageBtn}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                <FontAwesomeIcon
+                  icon={faChevronLeft}
+                  style={{ marginRight: "8px" }}
+                />
+                PREV
+              </button>
 
-            <div className={styles.pageNumbers}>
-              <button className={`${styles.numBtn} ${styles.activeNum}`}>
-                1
+              <div className={styles.pageNumbers}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (pageNum) => (
+                    <button
+                      key={pageNum}
+                      className={`${styles.numBtn} ${currentPage === pageNum ? styles.activeNum : ""}`}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <button
+                className={styles.pageBtn}
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              >
+                NEXT
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  style={{ marginLeft: "8px" }}
+                />
               </button>
             </div>
-
-            <button className={styles.pageBtn} disabled>
-              NEXT
-              <FontAwesomeIcon
-                icon={faChevronRight}
-                style={{ marginLeft: "8px" }}
-              />
-            </button>
-          </div>
+          )}
         </div>
       </section>
 

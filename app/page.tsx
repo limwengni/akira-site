@@ -23,15 +23,12 @@ const SystemOverviewPanel = () => {
       <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
         
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px", fontSize: "0.8rem", color: "#fca311", fontWeight: "bold" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px", fontSize: "0.8rem", color: "var(--success-color)", fontWeight: "bold" }}>
              <span>MODULE: CHARACTERS</span>
-             <span>60%</span>
+             <span>100%</span>
           </div>
           <div style={{ width: "100%", height: "6px", background: "#333", borderRadius: "3px", overflow: "hidden" }}>
-            <div style={{ width: "60%", height: "100%", background: "#fca311" }}></div>
-          </div>
-          <div style={{ fontSize: "0.75rem", opacity: 0.6, marginTop: "4px" }}>
-             List active. Profiles WIP.
+            <div style={{ width: "100%", height: "100%", background: "var(--success-color)" }}></div>
           </div>
         </div>
 
@@ -64,11 +61,11 @@ const SystemOverviewPanel = () => {
         <div style={{ borderTop: "1px dashed #444", paddingTop: "10px", marginTop: "5px" }}>
            <div style={{ fontSize: "0.7rem", color: "#666", display: "flex", justifyContent: "space-between" }}>
               <span>LAST UPDATE:</span>
-              <span>16 FEB 2026</span>
+              <span>21 FEB 2026</span>
            </div>
            <div style={{ fontSize: "0.7rem", color: "#666", display: "flex", justifyContent: "space-between" }}>
               <span>VERSION:</span>
-              <span>v.0.5.0-beta</span>
+              <span>v.0.6.0-beta</span>
            </div>
         </div>
 

@@ -264,6 +264,7 @@
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: #666;
+  margin-top: 4px;
 }
 
 .soundEffect {
@@ -287,6 +288,9 @@
 /* --- RIGHT MAIN CONTENT --- */
 .mainContent {
   width: 100%;
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .pagePanel {
@@ -299,6 +303,8 @@
   min-height: 800px;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .diagonalOverlay {
@@ -319,7 +325,7 @@
   position: relative;
   z-index: 5;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 20px;
   border-bottom: 4px dashed var(--border-dark);
@@ -353,19 +359,32 @@
 .archiveGrid {
   display: grid;
   /* grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); */
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 25px;
   position: relative;
   z-index: 5;
   max-width: 1000px;
   margin: 0 auto;
+  padding: 10px 20px;
 }
 
 .charEntryWrapper {
   height: 100%;
 }
 
-.teyanCard {
+.archiveGrid:hover .charEntryWrapper {
+  filter: grayscale(100%) opacity(1);
+  transition:
+    filter 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.archiveGrid .charEntryWrapper:hover {
+  filter: grayscale(0%) opacity(1);
+  z-index: 20;
+}
+
+/* .teyanCard {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -384,7 +403,6 @@
   box-shadow: 5px 5px 0px rgba(0, 0, 0, 1);
 }
 
-/* Image Area */
 .imgWrapContainer {
   position: relative;
   width: 100%;
@@ -412,7 +430,6 @@
   transform: scale(1.03);
 }
 
-/* Avatar - Square it off for manga style */
 .avatarBox {
   position: absolute;
   bottom: -20px;
@@ -421,7 +438,6 @@
   height: 60px;
   background: var(--surface);
   border: 2px solid var(--border-dark);
-  /* box-shadow: 3px 3px 0px rgba(0, 0, 0, 1); */
   z-index: 2;
 }
 
@@ -431,9 +447,8 @@
   object-fit: cover;
 }
 
-/* Meta Area */
 .cardMeta {
-  padding: 25px 12px 12px; /* Top padding to clear avatar */
+  padding: 25px 12px 12px;
   text-align: left;
   background: var(--surface);
   display: flex;
@@ -446,7 +461,7 @@
   display: flex;
   flex-direction: column;
   min-height: auto;
-  padding-left: 0; /* Resetting the padding since avatar is now styled differently */
+  padding-left: 0;
 }
 
 .nameBox {
@@ -477,13 +492,13 @@
 
 .charRoleAnt {
   font-weight: 900;
-  color: var(--error-color); /* Red accent */
+  color: var(--error-color);
   text-transform: uppercase;
 }
 
 .charRolePro {
   font-weight: 900;
-  color: var(--info-color); /* Blue accent */
+  color: var(--info-color);
   text-transform: uppercase;
 }
 
@@ -495,7 +510,7 @@
   font-weight: 600;
   border-left: 2px solid #ddd;
   padding-left: 10px;
-}
+} */
 
 /* =========================================
    5. FOOTERS & PAGINATION
@@ -1825,31 +1840,54 @@ select.inputField {
 
 /* HEADER */
 .profileHeader {
-  margin-bottom: 15px;
-  border-bottom: 3px solid #000;
-  padding-bottom: 15px;
-  flex-shrink: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: stretch;
+  gap: 30px;
+  margin-bottom: 30px;
+  border-bottom: 4px solid var(--border-dark, #111);
+  padding-bottom: 20px;
+}
+
+.nameRoleBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex-shrink: 0;
 }
 
 .profileHeader h1 {
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* Massive, bold name */
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  font-style: italic;
+  line-height: 0.9;
+  margin: 0 0 10px 0; /* Space between name and role */
+  color: var(--border-dark, #111);
 }
 
 .profileRole {
-  display: inline-block;
-  background: #000;
-  color: #fff;
-  padding: 5px 15px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  align-self: flex-end;
+  background: var(--border-dark, #111);
+  color: var(--surface, #fff);
+  padding: 4px 10px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transform: skewX(-10deg); /* Slanted to match the cards! */
+}
+
+.profileQuote {
+  display: flex;
+  align-items: center; /* Centers the quote vertically next to the big name */
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 800;
+  color: #555;
+  border-left: 4px solid var(--border-dark, #111); /* Thick tactical separator */
+  padding-left: 30px;
+  text-transform: uppercase;
+  line-height: 1.4;
 }
 
 /* TOP SECTION - IMAGE & QUICK STATS */
@@ -2036,7 +2074,7 @@ select.inputField {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #fff;
+  color: #000;
 }
 
 .profileError h2 {
@@ -2138,7 +2176,7 @@ select.inputField {
     /* Anchors it to the very corner */
     top: 0;
     right: 0;
-    border-radius: 0 10px 0 10px; 
+    border-radius: 0 10px 0 10px;
     width: 30px;
     height: 30px;
   }

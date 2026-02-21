@@ -12,6 +12,7 @@
   --info-color: #2563eb;
   --warn-color: #fca311;
   --error-color: #d00;
+  --success-color: #10b981;
 
   --font-display: var(--font-rubik), sans-serif;
   --font-sub: var(--font-rubik), monospace;

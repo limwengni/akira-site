@@ -61,16 +61,18 @@ export default function CharacterProfile() {
     return `${months[parseInt(monthStr) - 1]} ${parseInt(dayStr)}`;
   };
 
-  if (charLoading || (charList.length === 0 && !notFound)) {
+  if (charLoading || (!character && !notFound)) {
     return (
-      <div className={styles.profileLoading}>
-        <div className={styles.spinner}></div>
-        <p>ACCESSING RECORDS...</p>
+      <div className={styles.loadingOverlay}>
+        <div className={styles.loaderBox}>
+          <div className={styles.spinner}></div>
+          <p>ACCESSING RECORDS...</p>
+        </div>
       </div>
     );
   }
 
-  if (notFound || (!character && !charLoading)) {
+  if (notFound) {
     return (
       <div className={styles.profileError}>
         <h2>ERROR 404</h2>
@@ -115,10 +117,16 @@ export default function CharacterProfile() {
             <div className={styles.profilePage}>
               {/* Header with Name */}
               <div className={styles.profileHeader}>
-                <h1>{character.name}</h1>
-                <div className={styles.profileRole}>
-                  {getRoleLabel(character.role)}
+                <div className={styles.nameRoleBox}>
+                  <h1>{character.name}</h1>
+                  <div className={styles.profileRole}>
+                    {getRoleLabel(character.role)}
+                  </div>
                 </div>
+
+                {character.quote && (
+                  <div className={styles.profileQuote}>"{character.quote}"</div>
+                )}
               </div>
 
               {/* Character Image & Quick Stats */}
