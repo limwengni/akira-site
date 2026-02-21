@@ -52,7 +52,7 @@ export default function Characters() {
 
   const [loading, setLoading] = useState(true);
 
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("all");
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
 
@@ -106,16 +106,19 @@ export default function Characters() {
     }
   };
 
-  // This happens inside your component
   const availableRoles = Object.entries(ROLE_MAP).filter(([roleNum]) =>
     charList.some((char) => char.role === Number(roleNum)),
   );
 
   const filteredCharacters = charList.filter((char) => {
-    if (filter === "All") return true;
-    if (filter === "Unclassified") return char.role === 0;
-    if (filter === "Protagonist") return char.role === 1;
-    if (filter === "Antagonist") return char.role === 2;
+    if (filter === "all") return true;
+    if (filter === "unclassified") return char.role === 0;
+    if (filter === "protagonist") return char.role === 1;
+    if (filter === "antagonist") return char.role === 2;
+    if (filter === "deuteragonist") return char.role === 3;
+    if (filter === "supporting") return char.role === 4;
+    if (filter === "tritagonist") return char.role === 5;
+    if (filter === "minor") return char.role === 6;
     return true;
   });
 
@@ -177,8 +180,8 @@ export default function Characters() {
             <span className={styles.pageTag}>PAGE 1</span>
             <div className={styles.filterGroup}>
               <button
-                onClick={() => setFilter("All")}
-                className={filter === "All" ? styles.activeTab : styles.tab}
+                onClick={() => setFilter("all")}
+                className={filter === "all" ? styles.activeTab : styles.tab}
               >
                 ALL
               </button>
@@ -186,9 +189,11 @@ export default function Characters() {
               {availableRoles.map(([roleNum, roleLabel]) => (
                 <button
                   key={roleNum}
-                  onClick={() => setFilter(roleLabel)}
+                  onClick={() => setFilter(roleLabel.toLowerCase())}
                   className={
-                    filter === roleLabel ? styles.activeTab : styles.tab
+                    filter === roleLabel.toLowerCase()
+                      ? styles.activeTab
+                      : styles.tab
                   }
                 >
                   {roleLabel}
