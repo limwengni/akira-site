@@ -124,7 +124,7 @@
 
 .mainGrid {
   display: grid;
-  grid-template-columns: 250px 1fr; /* Fixed sidebar, flexible content */
+  grid-template-columns: 240px 1fr; /* Fixed sidebar, flexible content */
   gap: 40px;
   align-items: start;
 }
@@ -216,7 +216,7 @@
   color: inherit;
   font-weight: 900;
   font-style: italic;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -244,7 +244,7 @@
 }
 
 .statNumber {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 900;
   font-style: italic;
   line-height: 1;
@@ -323,13 +323,116 @@
 
 .pageHeader {
   position: relative;
-  z-index: 5;
+  z-index: 20;
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
   margin-bottom: 20px;
-  border-bottom: 4px dashed var(--border-dark);
-  padding-bottom: 10px;
+  border-bottom: 3px dashed var(--border-dark, #333);
+  padding-bottom: 15px;
+}
+
+.headerControls {
+  display: flex;
+  justify-content: space-between; /* Search on left, Filter on right */
+  align-items: center;
+  width: 100%;
+  gap: 15px;
+}
+
+/* --- SEARCH BAR --- */
+.searchWrapper {
+  position: relative;
+  flex-grow: 1;
+  max-width: 300px;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px; /* Distance from the left edge */
+  width: 16px;
+  height: 16px;
+  color: var(--text);
+  pointer-events: none; /* Ensures clicks pass through the icon to the input */
+}
+.searchInput {
+  width: 100%;
+  background: #fcfcfc;
+  border: 2px solid #ddd;
+  border-radius: 0;
+  /* Top, Right, Bottom, Left (Notice the 40px left padding for the icon!) */
+  padding: 8px 12px 8px 40px;
+  box-sizing: border-box;
+  color: var(--text, #fff);
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: bold;
+  letter-spacing: 1px;
+  outline: none;
+  transition: all 0.2s ease;
+  display: block;
+}
+input.searchInput {
+  height: 35px;
+}
+.searchInput:focus {
+  outline: none;
+  border-color: var(--border-dark);
+  background: var(--surface);
+}
+.clearButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%); /* Perfectly centers it vertically */
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #888);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+.clearButton:hover {
+  color: var(--text, #fff);
+}
+
+/* --- DROPDOWN LOGIC --- */
+.dropdownWrapper {
+  position: relative;
+}
+
+.dropdownToggle {
+  background: var(--surface);
+  border: 2px solid var(--border-dark);
+  padding: 10px 20px;
+  height: 35px;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+.dropdownToggle:hover {
+  background: var(--border-dark);
+  color: var(--surface);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-dark);
+  padding: 15px;
+  width: 320px; /* Wide enough so pills wrap nicely inside */
+  z-index: 50;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Adds a drop shadow to float above content */
 }
 
 .pageTag {
@@ -382,6 +485,59 @@
 .archiveGrid .charEntryWrapper:hover {
   filter: grayscale(0%) opacity(1);
   z-index: 20;
+}
+
+/* --- EMPTY STATE FALLBACK --- */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  grid-column: 1 / -1; /* If using CSS Grid, this makes it span the whole row */
+  margin-top: 20px;
+  min-height: 50vh;
+  padding: 60px 20px;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--border-dark);
+  margin-bottom: 15px;
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  color: var(--text);
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.emptyState p {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin: 0 0 20px 0;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.resetButton {
+  background: var(--border-dark);
+  color: var(--surface);
+  border: 2px solid var(--border-dark);
+  padding: 10px 25px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetButton:hover {
+  background: var(--surface);
+  color: var(--text);
 }
 
 /* .teyanCard {
@@ -561,11 +717,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.numBtn:hover {
+  background: var(--border-dark);
+  color: var(--surface);
 }
 
 .activeNum {
   background: var(--border-dark);
   color: var(--surface);
+  cursor: default;
 }
 
 /* Main Page Footer */
@@ -1042,25 +1206,34 @@ select.inputField {
 
 .filterGroup {
   display: flex;
-  gap: 20px;
-  padding-bottom: 0;
+  flex-wrap: wrap;
+  gap: 10px 10px; /* Tighter gap for tags */
 }
-.tab {
+
+.tab,
+.activeTab {
   background: transparent;
-  border: none;
+  border: 1px solid var(--border-dark, #333);
+  border-radius: 20px; /* Gives the pill shape */
   cursor: pointer;
-  padding: 5px 5px;
+  padding: 8px 16px;
   font-size: 0.75rem;
   letter-spacing: 1px;
-  color: var(--text-dim);
+  color: var(--text-dim, #888);
   transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  white-space: nowrap;
 }
+
+.tab:hover {
+  border-color: var(--text-dim, #888);
+  color: var(--text, #fff);
+}
+
 .activeTab {
-  color: var(--text);
+  background: var(--text, #fff);
+  color: var(--surface);
   font-weight: bold;
-  border-bottom: 2px solid var(--screentone-grey);
+  border-color: var(--text, #fff);
 }
 
 @keyframes spin {

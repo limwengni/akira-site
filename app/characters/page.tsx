@@ -4,7 +4,7 @@
 import styles from "../index.module.css";
 import "../globals.css";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Cropper, { Area } from "react-easy-crop";
 
@@ -15,10 +15,23 @@ import { useImageCrop } from "@/src/hooks/useImageCrop";
 import { MangaPanel } from "@/src/components/MangaPanel";
 import { CharacterCard } from "@/src/components/CharacterCard";
 
-import { categoryLabels, ROLE_MAP } from "@/src/constants/character";
 import {
+  categoryLabels,
+  getRoleLabel,
+  ROLE_MAP,
+} from "@/src/constants/character";
+import {
+  faAngleDown,
+  faAngleUp,
+  faArrowDown,
+  faArrowUp,
+  faCaretDown,
+  faCaretUp,
   faChevronLeft,
   faChevronRight,
+  faClose,
+  faCross,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CharacterForm } from "@/src/components/CharacterForm";
@@ -54,10 +67,12 @@ export default function Characters() {
 
   const [filter, setFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 6;
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingChar, setEditingChar] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -113,15 +128,15 @@ export default function Characters() {
   );
 
   const filteredCharacters = charList.filter((char) => {
-    if (filter === "all") return true;
-    if (filter === "unclassified") return char.role === 0;
-    if (filter === "protagonist") return char.role === 1;
-    if (filter === "antagonist") return char.role === 2;
-    if (filter === "deuteragonist") return char.role === 3;
-    if (filter === "supporting") return char.role === 4;
-    if (filter === "tritagonist") return char.role === 5;
-    if (filter === "minor") return char.role === 6;
-    return true;
+    const matchesSearch = char.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const charRoleName = getRoleLabel(char.role).toLowerCase();
+
+    const matchesRole = filter === "all" || charRoleName === filter;
+
+    return matchesSearch && matchesRole;
   });
 
   const totalPages = Math.ceil(filteredCharacters.length / itemsPerPage);
@@ -130,6 +145,30 @@ export default function Characters() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // If the dropdown is open, AND the click was not inside the dropdownRef
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterOpen(false); // Close it!
+      }
+    };
+
+    // Only attach the listener if the menu is actually open
+    if (isFilterOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup the listener when the menu closes or component unmounts
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFilterOpen]);
 
   useEffect(() => {
     loadInitialData();
@@ -187,48 +226,137 @@ export default function Characters() {
           {/* Page Header */}
           <h2 className={styles.pageHeader}>
             {/* <span className={styles.pageTag}>PAGE 1</span> */}
-            <div className={styles.filterGroup}>
-              <button
-                onClick={() => {
-                  setFilter("all");
-                  setCurrentPage(1);
-                }}
-                className={filter === "all" ? styles.activeTab : styles.tab}
-              >
-                ALL
-              </button>
-
-              {availableRoles.map(([roleNum, roleLabel]) => (
-                <button
-                  key={roleNum}
-                  onClick={() => {
-                    setFilter(roleLabel.toLowerCase());
+            <div className={styles.headerControls}>
+              {/* SEARCH BAR */}
+              <div className={styles.searchWrapper}>
+                <FontAwesomeIcon
+                  icon={faSearch}
+                  className={styles.searchIcon}
+                />
+                <input
+                  type="text"
+                  placeholder="Search characters"
+                  className={styles.searchInput}
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className={
-                    filter === roleLabel.toLowerCase()
-                      ? styles.activeTab
-                      : styles.tab
-                  }
+                />
+
+                {/* Clear Button (only appears if there's text) */}
+                {searchQuery && (
+                  <button
+                    className={styles.clearButton}
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear Search"
+                  >
+                    <FontAwesomeIcon
+                      icon={faClose}
+                      className={styles.closeButton}
+                    />
+                  </button>
+                )}
+              </div>
+
+              {/* FILTER DROPDOWN */}
+              <div className={styles.dropdownWrapper}>
+                <button
+                  className={styles.dropdownToggle}
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
                 >
-                  {roleLabel}
+                  FILTER: {filter.toUpperCase()}
+                  {isFilterOpen ? (
+                    <FontAwesomeIcon
+                      icon={faCaretUp}
+                      className={styles.closeButton}
+                    />
+                  ) : (
+                    <FontAwesomeIcon
+                      icon={faCaretDown}
+                      className={styles.closeButton}
+                    />
+                  )}
                 </button>
-              ))}
+
+                {isFilterOpen && (
+                  <div className={styles.dropdownMenu}>
+                    <div className={styles.filterGroup}>
+                      <button
+                        onClick={() => {
+                          setFilter("all");
+                          setCurrentPage(1);
+                          setIsFilterOpen(false); // Close menu on click
+                        }}
+                        className={
+                          filter === "all" ? styles.activeTab : styles.tab
+                        }
+                      >
+                        ALL
+                      </button>
+
+                      {availableRoles.map(([roleNum, roleLabel]) => (
+                        <button
+                          key={roleNum}
+                          onClick={() => {
+                            setFilter(roleLabel.toLowerCase());
+                            setCurrentPage(1);
+                            setIsFilterOpen(false); // Close menu on click
+                          }}
+                          className={
+                            filter === roleLabel.toLowerCase()
+                              ? styles.activeTab
+                              : styles.tab
+                          }
+                        >
+                          {roleLabel}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </h2>
 
           {/* Character Grid */}
           <div className={styles.archiveGrid}>
-            {paginatedCharacters?.map((char, index) => (
-              <div key={char.id} className={styles.charEntryWrapper}>
-                <CharacterCard
-                  char={char}
-                  isLoggedIn={isLoggedIn}
-                  onEdit={setEditingChar}
-                  onDelete={handleDelete}
-                />
+            {paginatedCharacters && paginatedCharacters.length > 0 ? (
+              paginatedCharacters.map((char, index) => (
+                <div key={char.id} className={styles.charEntryWrapper}>
+                  <CharacterCard
+                    char={char}
+                    isLoggedIn={isLoggedIn}
+                    onEdit={setEditingChar}
+                    onDelete={handleDelete}
+                  />
+                </div>
+              ))
+            ) : (
+              /* --- THE EMPTY STATE FALLBACK --- */
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>?</div>
+                <h3>No characters found!</h3>
+                <p>
+                  We couldn't find anyone matching "<b>{searchQuery}</b>"
+                  {filter !== "all"
+                    ? ` in the ${filter.toUpperCase()} category`
+                    : ""}
+                  .
+                </p>
+
+                <button
+                  className={styles.resetButton}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilter("all");
+                    setCurrentPage(1); // Reset page here too!
+                  }}
+                >
+                  CLEAR FILTERS
+                </button>
               </div>
-            ))}
+            )}
           </div>
 
           {/* Pagination Footer */}

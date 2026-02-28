@@ -46,9 +46,9 @@ export const CharacterCard = ({
         }
 
         .trap-btn {
-          background: var(--surface, #fff);
-          border: 2px solid var(--border-dark, #111);
-          color: var(--border-dark, #111);
+          background: var(--surface);
+          border: 2px solid var(--border-dark);
+          color: var(--border-dark);
           width: 28px;
           height: 28px;
           display: flex;
@@ -57,7 +57,10 @@ export const CharacterCard = ({
           cursor: pointer;
           transition: background 0.2s;
         }
-        .trap-btn:hover { background: #eee; }
+        .trap-btn:hover { 
+          background: var(--border-dark); 
+          color: var(--surface);
+        }
 
         .trap-link {
           display: block;
