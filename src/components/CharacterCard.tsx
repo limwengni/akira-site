@@ -21,18 +21,19 @@ export const CharacterCard = ({
       <style>{`
         .trap-card-wrapper {
           position: relative;
-          width: 100%;
-          aspect-ratio: 2 / 3;
-          transform: skewX(-8deg); 
-          border: 4px solid var(--border-dark, #111);
-          overflow: hidden;
+          width: 125%;
+          margin-left: -12.5%;
+          aspect-ratio: 4 / 7;
+          /* Magic cut: Top-Left to Top-Right to Bottom-Right to Bottom-Left */
+          clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
           background: var(--surface);
           transition: transform 0.2s ease;
           cursor: pointer;
         }
 
         .trap-card-wrapper:hover {
-          transform: skewX(-8deg) translate(-4px, -4px); 
+          transform: translateY(-8px); 
+          z-index: 50;
         }
 
         .trap-actions {
@@ -42,7 +43,6 @@ export const CharacterCard = ({
           z-index: 20;
           display: flex;
           gap: 6px;
-          transform: skewX(8deg); 
         }
 
         .trap-btn {
@@ -55,8 +55,9 @@ export const CharacterCard = ({
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: background 0.2s;
+          transition: background 0.2s, color 0.2s;
         }
+        
         .trap-btn:hover { 
           background: var(--border-dark); 
           color: var(--surface);
@@ -73,36 +74,29 @@ export const CharacterCard = ({
           width: 100%; 
           height: 100%;
           object-fit: cover;
-          object-position: top center; 
-          transform-origin: center;
-          
-          transform: skewX(8deg) scale(1.25); 
-          transition: transform 0.5s ease, filter 0.3s ease;
+          object-position: center; 
+          transition: transform 0.5s ease;
         }
 
         .trap-card-wrapper:hover .trap-link img {
-          transform: skewX(8deg) scale(1.30); 
+          transform: scale(1.1);
         }
 
         .trap-meta {
           position: absolute;
           bottom: 0;
           left: 0;
-          transform: skewX(8deg); 
-          width: 110%;
-          margin-left: -5%;
-          /* Reduced top padding so the gradient doesn't go up so high */
-          padding: 30px 20px 12px 20px; 
-          /* SOFTER GRADIENT: Starts at 70% black and fades out quickly */
-          background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 80%);
+          width: 100%;
+          padding: 40px 25% 15px 5%;
+          background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
+          align-items: center;
           pointer-events: none; 
         }
 
         .trap-name {
-          color: #fff;
+          color: var(--surface);
           font-size: 1.25rem;
           font-weight: 900;
           text-transform: uppercase;
@@ -116,7 +110,7 @@ export const CharacterCard = ({
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 1.5px;
-          text-shadow: 1px 1px 0px #000;
+          text-shadow: 1px 1px 0px var(--text);
         }
 
         .trap-role-pro { color: var(--info-color, #2563eb); }

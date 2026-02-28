@@ -21,16 +21,11 @@ import {
   ROLE_MAP,
 } from "@/src/constants/character";
 import {
-  faAngleDown,
-  faAngleUp,
-  faArrowDown,
-  faArrowUp,
   faCaretDown,
   faCaretUp,
   faChevronLeft,
   faChevronRight,
   faClose,
-  faCross,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -130,7 +125,7 @@ export default function Characters() {
   const filteredCharacters = charList.filter((char) => {
     const matchesSearch = char.name
       .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+      .includes(searchQuery.toLowerCase()); // by default is "" so it returns true
 
     const charRoleName = getRoleLabel(char.role).toLowerCase();
 
