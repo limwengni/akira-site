@@ -13,7 +13,7 @@ import { useCharacters } from "@/src/hooks/useCharacters";
 import { useImageCrop } from "@/src/hooks/useImageCrop";
 
 import { MangaPanel } from "@/src/components/MangaPanel";
-import { CharacterCard } from "@/src/components/CharacterCard";
+import { CharacterCard, CharacterCardSkeleton } from "@/src/components/CharacterCard";
 
 import {
   categoryLabels,
@@ -58,8 +58,6 @@ export default function Characters() {
     openExistingInCropper,
   } = useImageCrop();
 
-  const [loading, setLoading] = useState(true);
-
   const [filter, setFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -101,22 +99,6 @@ export default function Characters() {
     }
   };
   //#endregion
-
-  // #region --- Load Function ---
-  const loadInitialData = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch Characters
-      await fetchCharacters();
-
-      await checkAuthStatus();
-    } catch (err) {
-      console.error("Initialization failed:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const availableRoles = Object.entries(ROLE_MAP).filter(([roleNum]) =>
     charList.some((char) => char.role === Number(roleNum)),
@@ -166,7 +148,7 @@ export default function Characters() {
   }, [isFilterOpen]);
 
   useEffect(() => {
-    loadInitialData();
+    checkAuthStatus();
   }, []);
 
   useEffect(() => {
@@ -261,7 +243,7 @@ export default function Characters() {
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
                 >
                   FILTER: {filter.toUpperCase()}
-                  {isFilterOpen ? (
+                  {/* {isFilterOpen ? (
                     <FontAwesomeIcon
                       icon={faCaretUp}
                       className={styles.closeButton}
@@ -271,7 +253,7 @@ export default function Characters() {
                       icon={faCaretDown}
                       className={styles.closeButton}
                     />
-                  )}
+                  )} */}
                 </button>
 
                 {isFilterOpen && (
@@ -316,7 +298,15 @@ export default function Characters() {
 
           {/* Character Grid */}
           <div className={styles.archiveGrid}>
-            {paginatedCharacters && paginatedCharacters.length > 0 ? (
+            {/* 1. IF SWR IS FETCHING: Show Skeletons */}
+            {charLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={`skeleton-${i}`} className={styles.charEntryWrapper}>
+                  <CharacterCardSkeleton />
+                </div>
+              ))
+            ) :
+            paginatedCharacters && paginatedCharacters.length > 0 ? (
               paginatedCharacters.map((char, index) => (
                 <div key={char.id} className={styles.charEntryWrapper}>
                   <CharacterCard
@@ -409,15 +399,6 @@ export default function Characters() {
         >
           +
         </button>
-      )}
-
-      {loading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loaderBox}>
-            <div className={styles.spinner}></div>
-            <p>SYNCHRONIZING WITH ARCHIVE...</p>
-          </div>
-        </div>
       )}
 
       {/* Image Cropper Modal */}

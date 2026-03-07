@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { getRoleLabel } from "../constants/character";
@@ -21,25 +22,24 @@ export const CharacterCard = ({
       <style>{`
         .trap-card-wrapper {
           position: relative;
-          width: 125%;
-          margin-left: -12.5%;
+          width: 100%;
           aspect-ratio: 4 / 7;
-          /* Magic cut: Top-Left to Top-Right to Bottom-Right to Bottom-Left */
-          clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+          border: 3px solid var(--border-dark, #000);
           background: var(--surface);
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
           cursor: pointer;
+          overflow: hidden;
         }
 
         .trap-card-wrapper:hover {
-          transform: translateY(-8px); 
+          transform: translateY(-4px); 
           z-index: 50;
         }
 
         .trap-actions {
           position: absolute;
           top: 10px;
-          right: 15px;
+          right: 10px;
           z-index: 20;
           display: flex;
           gap: 6px;
@@ -79,30 +79,32 @@ export const CharacterCard = ({
         }
 
         .trap-card-wrapper:hover .trap-link img {
-          transform: scale(1.1);
+          transform: scale(1.05);
         }
 
         .trap-meta {
           position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          padding: 40px 25% 15px 5%;
-          background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+          bottom: -1px;
+          left: -1px;
+          right: -1px;
+          padding: 25px 15px 10px 15px;
+          clip-path: polygon(0 25%, 100% 0, 100% 100%, 0% 100%);
+          background: var(--border-dark, #000); 
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: flex-start;
           pointer-events: none; 
         }
 
         .trap-name {
-          color: var(--surface);
+          color: var(--surface, #fff);
           font-size: 1.25rem;
           font-weight: 900;
           text-transform: uppercase;
           font-style: italic;
-          margin: 0 0 2px 0;
+          margin: 0;
           line-height: 1;
+          text-shadow: none;
         }
 
         .trap-role {
@@ -139,16 +141,61 @@ export const CharacterCard = ({
         )}
 
         <Link href={`/characters/${char.slug}`} className="trap-link">
-          <img
+          <Image
             src={`${char.image_url}?width=600&height=800&resize=cover`}
             alt={char.name}
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
           <div className="trap-meta">
             <h3 className="trap-name">{char.name}</h3>
           </div>
         </Link>
+      </div>
+    </>
+  );
+};
+
+export const CharacterCardSkeleton = () => {
+  return (
+    <>
+      <style>{`
+        .trap-skeleton-wrapper {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 4 / 7;
+          border: 3px solid var(--border-dark, #000);
+          background: #e0e0e0; /* Base light grey */
+          overflow: hidden;
+        }
+
+        /* The badass pulsing animation */
+        .trap-skeleton-pulse {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
+          background-size: 200% 100%;
+          animation: pulse-anim 1.5s infinite linear;
+        }
+
+        @keyframes pulse-anim {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
+        .trap-skeleton-meta {
+          position: absolute;
+          bottom: -1px; left: -1px; right: -1px;
+          height: 60px; /* Roughly the height of your name banner */
+          clip-path: polygon(0 25%, 100% 0, 100% 100%, 0% 100%);
+          background: #333; /* Darker grey to mimic the black banner */
+        }
+      `}</style>
+
+      <div className="trap-skeleton-wrapper">
+        <div className="trap-skeleton-pulse"></div>
+        <div className="trap-skeleton-meta"></div>
       </div>
     </>
   );

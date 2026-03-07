@@ -1,18 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { characterService } from "@/src/services/character";
 
+const characterFetcher = async () => {
+  const { data, error } = await characterService.fetchAllCharacters();
+  if (error) throw error;
+  return data || [];
+};
+
 export const useCharacters = () => {
-  const [charList, setCharList] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    data: charList = [], // Defaults to an empty array so map() doesn't break
+    isLoading: loading,
+    mutate, // The magic cache updater function
+  } = useSWR("characters-cache", characterFetcher);
+
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchCharacters = async () => {
-    setLoading(true);
-    const data = await characterService.fetchAllCharacters();
-    setCharList(data.data || []);
-    setLoading(false);
+    await mutate();
   };
 
   const handleSave = async (
@@ -69,13 +77,15 @@ export const useCharacters = () => {
       slug: currentSlug,
     };
 
+    let updatedList;
     if (isNew) {
-      setCharList((prev) => [optimisticChar, ...prev]); // Add to top of list
+      updatedList = [optimisticChar, ...charList];
     } else {
-      setCharList((prev) =>
-        prev.map((c) => (c.id === editingChar!.id ? optimisticChar : c)),
+      updatedList = charList.map((c: any) =>
+        c.id === editingChar!.id ? optimisticChar : c,
       );
     }
+    mutate(updatedList, false);
 
     const tempEditingId = editingChar?.id; // Remember this for the DB call
 
@@ -176,34 +186,22 @@ export const useCharacters = () => {
       );
 
       // Save to Database
-      try {
-        await characterService.save(
-          charPayload,
-          statsPayload,
-          isNew ? null : tempEditingId,
-        );
+      await characterService.save(
+        charPayload,
+        statsPayload,
+        isNew ? null : tempEditingId,
+      );
 
-        // FINAL USER FEEDBACK
-        if (uploadErrors.length > 0) {
-          alert(
-            `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
-          );
-        } else {
-          alert("Character saved successfully!");
-        }
-      } catch (dbError: any) {
-        console.error("DATABASE ERROR:", dbError); // Check F12 console for this!
+      // FINAL USER FEEDBACK
+      if (uploadErrors.length > 0) {
         alert(
-          "Failed to save character data: " +
-            (dbError.message || "Unknown Error"),
+          `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
         );
+      } else {
+        alert("Character saved successfully!");
       }
 
-      const freshData = await characterService.fetchAllCharacters();
-      if (freshData.data) {
-        setCharList(freshData.data);
-      }
-
+      mutate();
       console.log("Background sync complete.");
     } catch (err: any) {
       console.error("Sync failed", err);
@@ -216,24 +214,26 @@ export const useCharacters = () => {
   };
 
   const handleDelete = async (id: number, slug: string) => {
-    if (!confirm(`CONFIRM PERMANENT DELETION OF ${slug.toUpperCase()}?`)) return;
+    if (!confirm(`CONFIRM PERMANENT DELETION OF ${slug.toUpperCase()}?`))
+      return;
 
     const originalList = [...charList];
-    setCharList((prev) => prev.filter((c) => c.id !== id));
+    mutate(charList.filter((c: any) => c.id !== id), false);
 
     try {
       await characterService.delete(id, slug);
       alert("Character deleted successfully.");
+      mutate();
     } catch (err: any) {
       console.error("Deletion failed:", err);
       alert("Deletion Error: " + err.message);
-      setCharList(originalList); // Revert UI
+      // Revert the UI if the database failed to delete
+      mutate(originalList, false);
     }
   };
 
   return {
     charList,
-    setCharList,
     loading,
     fetchCharacters,
     handleSave,
