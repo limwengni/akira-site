@@ -18,14 +18,7 @@ export default function CharacterProfile() {
   const [character, setCharacter] = useState<any>(null);
   const [notFound, setNotFound] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { charList, loading: charLoading, fetchCharacters } = useCharacters();
-
-  useEffect(() => {
-    const init = async () => {
-      if (charList.length === 0) await fetchCharacters();
-    };
-    init();
-  }, []);
+  const { charList, loading: charLoading } = useCharacters();
 
   useEffect(() => {
     if (charList.length > 0 && params.slug) {

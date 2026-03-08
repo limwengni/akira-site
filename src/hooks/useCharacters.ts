@@ -197,16 +197,13 @@ export const useCharacters = () => {
         alert(
           `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
         );
-      } else {
-        alert("Character saved successfully!");
       }
 
       mutate();
-      console.log("Background sync complete.");
     } catch (err: any) {
       console.error("Sync failed", err);
-      alert("Critical Sync Error: " + err.message + ". The page will reload.");
-      window.location.reload();
+      alert("Save failed: " + err.message);
+      mutate(charList, false); // ← revert back instead of reloading
     } finally {
       setIsSaving(false);
       onSuccess();
@@ -222,7 +219,6 @@ export const useCharacters = () => {
 
     try {
       await characterService.delete(id, slug);
-      alert("Character deleted successfully.");
       mutate();
     } catch (err: any) {
       console.error("Deletion failed:", err);

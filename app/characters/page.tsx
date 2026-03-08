@@ -38,7 +38,6 @@ export default function Characters() {
   const {
     charList,
     loading: charLoading,
-    fetchCharacters,
     handleSave,
     handleDelete,
     isSaving,
@@ -243,7 +242,7 @@ export default function Characters() {
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
                 >
                   FILTER: {filter.toUpperCase()}
-                  {/* {isFilterOpen ? (
+                  {isFilterOpen ? (
                     <FontAwesomeIcon
                       icon={faCaretUp}
                       className={styles.closeButton}
@@ -253,7 +252,7 @@ export default function Characters() {
                       icon={faCaretDown}
                       className={styles.closeButton}
                     />
-                  )} */}
+                  )}
                 </button>
 
                 {isFilterOpen && (

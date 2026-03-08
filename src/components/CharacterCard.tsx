@@ -24,11 +24,20 @@ export const CharacterCard = ({
           position: relative;
           width: 100%;
           aspect-ratio: 4 / 7;
-          border: 3px solid var(--border-dark, #000);
+          border: none; 
           background: var(--surface);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
           cursor: pointer;
           overflow: hidden;
+        }
+
+        .trap-card-wrapper::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: 3px solid var(--border-dark, #000);
+          pointer-events: none;
+          z-index: 99;
         }
 
         .trap-card-wrapper:hover {
@@ -84,27 +93,32 @@ export const CharacterCard = ({
 
         .trap-meta {
           position: absolute;
-          bottom: -1px;
-          left: -1px;
-          right: -1px;
-          padding: 25px 15px 10px 15px;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 25px 15px 15px 10px;
           clip-path: polygon(0 25%, 100% 0, 100% 100%, 0% 100%);
           background: var(--border-dark, #000); 
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          pointer-events: none; 
+          pointer-events: none;
         }
 
         .trap-name {
           color: var(--surface, #fff);
-          font-size: 1.25rem;
+          font-size: 1rem;
           font-weight: 900;
           text-transform: uppercase;
           font-style: italic;
           margin: 0;
           line-height: 1;
           text-shadow: none;
+
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 100%;
         }
 
         .trap-role {
@@ -186,10 +200,39 @@ export const CharacterCardSkeleton = () => {
 
         .trap-skeleton-meta {
           position: absolute;
-          bottom: -1px; left: -1px; right: -1px;
-          height: 60px; /* Roughly the height of your name banner */
+          bottom: -1px;
+          left: -1px;
+          right: -1px;
+          padding: 25px 15px 10px 15px;
           clip-path: polygon(0 25%, 100% 0, 100% 100%, 0% 100%);
-          background: #333; /* Darker grey to mimic the black banner */
+          background: var(--screentone-grey, #333); 
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          pointer-events: none; 
+          height: 50px;
+        }
+
+        @media (max-width: 600px) {
+          .trap-meta {
+            padding: 30px 12px 12px 12px; /* more breathing room */
+          }
+
+          .trap-name {
+            font-size: 0.85rem;
+          }
+
+          .trap-btn {
+            width: 24px;
+            height: 24px;
+            font-size: 0.7rem;
+          }
+
+          .trap-actions {
+            top: 6px;
+            right: 6px;
+            gap: 4px;
+          }
         }
       `}</style>
 
