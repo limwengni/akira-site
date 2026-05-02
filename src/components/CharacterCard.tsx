@@ -3,6 +3,7 @@ import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { getRoleLabel } from "../constants/character";
+import styles from "../../app/index.module.css";
 
 interface CharacterCardProps {
   char: any;
@@ -17,135 +18,27 @@ export const CharacterCard = ({
   onEdit,
   onDelete,
 }: CharacterCardProps) => {
+  const roleLabel = getRoleLabel(char.role);
+  const roleClassName =
+    roleLabel === "Protagonist"
+      ? styles.characterCardRolePro
+      : roleLabel === "Antagonist"
+        ? styles.characterCardRoleAnt
+        : styles.characterCardRoleDefault;
+
   return (
-    <>
-      <style>{`
-        .trap-card-wrapper {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4 / 7;
-          border: none; 
-          background: var(--surface);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          cursor: pointer;
-          overflow: hidden;
-        }
-
-        .trap-card-wrapper::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          border: 3px solid var(--border-dark, #000);
-          pointer-events: none;
-          z-index: 99;
-        }
-
-        .trap-card-wrapper:hover {
-          transform: translateY(-4px); 
-          z-index: 50;
-        }
-
-        .trap-actions {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          z-index: 20;
-          display: flex;
-          gap: 6px;
-        }
-
-        .trap-btn {
-          background: var(--surface);
-          border: 2px solid var(--border-dark);
-          color: var(--border-dark);
-          width: 28px;
-          height: 28px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: background 0.2s, color 0.2s;
-        }
-        
-        .trap-btn:hover { 
-          background: var(--border-dark); 
-          color: var(--surface);
-        }
-
-        .trap-link {
-          display: block;
-          width: 100%;
-          height: 100%;
-          position: relative;
-        }
-
-        .trap-link img {
-          width: 100%; 
-          height: 100%;
-          object-fit: cover;
-          object-position: center; 
-          transition: transform 0.5s ease;
-        }
-
-        .trap-card-wrapper:hover .trap-link img {
-          transform: scale(1.05);
-        }
-
-        .trap-meta {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          padding: 25px 15px 15px 10px;
-          clip-path: polygon(0 25%, 100% 0, 100% 100%, 0% 100%);
-          background: var(--border-dark, #000); 
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          pointer-events: none;
-        }
-
-        .trap-name {
-          color: var(--surface, #fff);
-          font-size: 1rem;
-          font-weight: 900;
-          text-transform: uppercase;
-          font-style: italic;
-          margin: 0;
-          line-height: 1;
-          text-shadow: none;
-
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          width: 100%;
-        }
-
-        .trap-role {
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          text-shadow: 1px 1px 0px var(--text);
-        }
-
-        .trap-role-pro { color: var(--info-color, #2563eb); }
-        .trap-role-ant { color: var(--error-color, #d00); }
-        .trap-role-default { color: #cccccc; }
-      `}</style>
-
-      <div className="trap-card-wrapper">
+      <article className={styles.characterCard}>
         {isLoggedIn && (
-          <div className="trap-actions">
+          <div className={styles.characterCardActions}>
             <button
-              className="trap-btn"
+              className={styles.characterCardActionBtn}
               onClick={() => onEdit(char)}
               title="Edit"
             >
               <FontAwesomeIcon icon={faEdit} />
             </button>
             <button
-              className="trap-btn"
+              className={styles.characterCardActionBtn}
               onClick={() => onDelete(char.id, char.slug)}
               title="Delete"
             >
@@ -154,92 +47,34 @@ export const CharacterCard = ({
           </div>
         )}
 
-        <Link href={`/characters/${char.slug}`} className="trap-link">
+        <Link href={`/characters/${char.slug}`} className={styles.characterCardLink}>
           <Image
             src={`${char.image_url}?width=600&height=800&resize=cover`}
             alt={char.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className={styles.characterCardImage}
           />
 
-          <div className="trap-meta">
-            <h3 className="trap-name">{char.name}</h3>
+          <div className={styles.characterCardMeta}>
+            <span className={`${styles.characterCardRole} ${roleClassName}`}>
+              {roleLabel}
+            </span>
+            <h3 className={styles.characterCardName}>{char.name}</h3>
           </div>
         </Link>
-      </div>
-    </>
+      </article>
   );
 };
 
 export const CharacterCardSkeleton = () => {
   return (
-    <>
-      <style>{`
-        .trap-skeleton-wrapper {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4 / 7;
-          border: 3px solid var(--border-dark, #000);
-          background: #e0e0e0; /* Base light grey */
-          overflow: hidden;
-        }
-
-        /* The badass pulsing animation */
-        .trap-skeleton-pulse {
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
-          background-size: 200% 100%;
-          animation: pulse-anim 1.5s infinite linear;
-        }
-
-        @keyframes pulse-anim {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-
-        .trap-skeleton-meta {
-          position: absolute;
-          bottom: -1px;
-          left: -1px;
-          right: -1px;
-          padding: 25px 15px 10px 15px;
-          clip-path: polygon(0 25%, 100% 0, 100% 100%, 0% 100%);
-          background: var(--screentone-grey, #333); 
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          pointer-events: none; 
-          height: 50px;
-        }
-
-        @media (max-width: 600px) {
-          .trap-meta {
-            padding: 30px 12px 12px 12px; /* more breathing room */
-          }
-
-          .trap-name {
-            font-size: 0.85rem;
-          }
-
-          .trap-btn {
-            width: 24px;
-            height: 24px;
-            font-size: 0.7rem;
-          }
-
-          .trap-actions {
-            top: 6px;
-            right: 6px;
-            gap: 4px;
-          }
-        }
-      `}</style>
-
-      <div className="trap-skeleton-wrapper">
-        <div className="trap-skeleton-pulse"></div>
-        <div className="trap-skeleton-meta"></div>
+    <div className={styles.characterCardSkeleton}>
+      <div className={styles.characterCardSkeletonPulse}></div>
+      <div className={styles.characterCardSkeletonMeta}>
+        <div className={styles.characterCardSkeletonTag}></div>
+        <div className={styles.characterCardSkeletonName}></div>
       </div>
-    </>
+    </div>
   );
 };

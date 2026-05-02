@@ -196,9 +196,7 @@ export default function Characters() {
       <SystemOverviewPanel />
 
       <section className={styles.mainContent}>
-        <div className={styles.pagePanel}>
-          <div className={styles.diagonalOverlay}></div>
-
+        <div className={`${styles.pagePanel} ${styles.characterListingPanel}`}>
           {/* Page Header */}
           <h2 className={styles.pageHeader}>
             {/* <span className={styles.pageTag}>PAGE 1</span> */}

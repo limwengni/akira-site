@@ -6,9 +6,7 @@ import "./globals.css";
 import { usePathname } from "next/navigation";
 import { Header } from "@/src/components/Header";
 import { Footer } from "@/src/components/Footer";
-import { MangaPanel } from "@/src/components/MangaPanel";
 import { useAuth } from "@/src/hooks/useAuth";
-import Link from "next/link";
 
 export default function ClientLayout({
   children,
@@ -59,34 +57,13 @@ export default function ClientLayout({
         <div id="mangaPage" className={styles.pageContainer}>
           <div className={styles.halftoneBg}></div>
           <div className={styles.contentWrapper}>
-            {!isCharacterProfile && <Header />}
+            {!isCharacterProfile && (
+              <Header menuItems={menuItems} pathname={pathname ?? ""} />
+            )}
 
             <main className={isCharacterProfile ? "" : styles.mainGrid}>
               {!isCharacterProfile && (
                 <aside className={styles.sidebar}>
-                  <MangaPanel
-                    title="CONTENTS"
-                    dark
-                    collapsible={true}
-                    defaultOpen={true}
-                  >
-                    <nav className={styles.navLinks}>
-                      {menuItems.map((item) => (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          className={`${styles.navItem} ${
-                            pathname === item.href ? styles.activeNavItem : ""
-                          }`}
-                        >
-                          <span>
-                            {item.id}. {item.label}
-                          </span>
-                        </Link>
-                      ))}
-                    </nav>
-                  </MangaPanel>
-
                   <div id="page-sidebar-slot"></div>
                 </aside>
               )}
@@ -109,38 +86,45 @@ export default function ClientLayout({
       {/* Login Modal */}
       {showLogin && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
+          <div className={`${styles.modalContent} ${styles.authModalContent}`}>
+            <button
+              type="button"
+              className={styles.authModalClose}
+              onClick={() => setShowLogin(false)}
+              aria-label="Close login dialog"
+            >
+              ×
+            </button>
             <header className={styles.modalHeader}>
-              <h3>ADMIN ACCESS</h3>
+              <h3 className={styles.authModalTitle}>ADMIN LOGIN</h3>
             </header>
             <form onSubmit={onLoginSubmit}>
-              <input
-                type="email"
-                placeholder="Admin Email"
-                className={styles.inputField}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <div style={{ paddingBottom: "15px" }}></div>
-              <input
-                type="password"
-                placeholder="Password"
-                className={styles.inputField}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <div className={styles.modalActions}>
-                <button type="submit" className={styles.saveBtn}>
-                  Unlock
-                </button>
-                <button
-                  type="button"
-                  className={styles.closeBtn}
-                  onClick={() => setShowLogin(false)}
-                >
-                  Cancel
+              <div className={styles.authInputShell}>
+                <span className={styles.authInputLabel}>Username/Email</span>
+                <input
+                  type="email"
+                  placeholder=""
+                  className={`${styles.inputField} ${styles.authModalInput}`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div style={{ paddingBottom: "12px" }}></div>
+              <div className={styles.authInputShell}>
+                <span className={styles.authInputLabel}>Password</span>
+                <input
+                  type="password"
+                  placeholder=""
+                  className={`${styles.inputField} ${styles.authModalInput}`}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={`${styles.modalActions} ${styles.authModalActions}`}>
+                <button type="submit" className={`${styles.saveBtn} ${styles.authPrimaryBtn}`}>
+                  Log In
                 </button>
               </div>
             </form>
@@ -151,17 +135,27 @@ export default function ClientLayout({
       {/* Logout Modal */}
       {showLogout && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
+          <div className={`${styles.modalContent} ${styles.authModalContent} ${styles.authModalNoClose}`}>
+            <button
+              type="button"
+              className={styles.authModalClose}
+              onClick={() => setShowLogout(false)}
+              aria-label="Close logout dialog"
+            >
+              ×
+            </button>
             <header className={styles.modalHeader}>
-              <h3>CONFIRM LOGOUT</h3>
+              <h3 className={styles.authModalTitle}>CONFIRM LOGOUT</h3>
             </header>
-            <p>Are you sure you want to logout?</p>
-            <div className={styles.modalActions}>
-              <button className={styles.saveBtn} onClick={onLogoutSubmit}>
+            <p className={styles.authModalText}>
+              Are you sure you want to log out of admin mode?
+            </p>
+            <div className={`${styles.modalActions} ${styles.authModalActions}`}>
+              <button className={`${styles.saveBtn} ${styles.authPrimaryBtn}`} onClick={onLogoutSubmit}>
                 Confirm
               </button>
               <button
-                className={styles.closeBtn}
+                className={`${styles.closeBtn} ${styles.authSecondaryBtn}`}
                 onClick={() => setShowLogout(false)}
               >
                 Cancel

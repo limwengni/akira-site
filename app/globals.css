@@ -2,12 +2,12 @@
 
 /* --- UNIVERSAL CONFIG --- */
 :root {
-  --bg: #fdfdfd;
+  --bg: #efefef;
   --surface: #ffffff;
   --text: #1a1a1a;
   --text-dim: #999;
   --border: #e2e2e5;
-  --border-dark: #000;
+  --border-dark: #232425;
   --screentone-grey: #cccccc;
   --info-color: #2563eb;
   --warn-color: #fca311;
@@ -34,11 +34,7 @@ body {
   color: var(--text);
   font-family: var(--font-main);
   overflow-x: hidden;
-  /* Grid Pattern Background */
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px);
-  background-size: 30px 30px;
+  background-image: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

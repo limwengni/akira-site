@@ -30,12 +30,14 @@ export const MangaPanel = ({
     >
       <div
         className={`${styles.panelHeader} ${
+          collapsible ? styles.collapsibleHeader : ""
+        } ${
           dark ? styles.headerDark : styles.headerLight
         }`}
         // Only toggle if collapsible is true
         onClick={() => collapsible && setIsOpen(!isOpen)}
       >
-        <span>{title}</span>
+        <span className={styles.panelHeaderTitle}>{title}</span>
 
         {/* Render icon if collapsible is true. 
             CSS will HIDE this on desktop automatically. */}

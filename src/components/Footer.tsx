@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "../../app/index.module.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface FooterProps {
   isLoggedIn: boolean;
@@ -33,20 +33,11 @@ export const Footer = ({
 
   return (
     <footer className={styles.mangaFooter}>
-      <div className={styles.footerLeft}>
-        <div className={styles.theEnd}>完。</div>
-      </div>
-      <div className={styles.footerRight}>
-        <div className={styles.footerBlocks}>
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className={`${styles.block} ${i === 0 ? styles.blockActive : ""}`}
-            ></div>
-          ))}
-        </div>
+      <div className={styles.footerBar}>
         <div className={styles.copyrightTag} onClick={handleSecretClick}>
-          Copyright © {new Date().getFullYear()} Akira
+          {"Copyright \u00A9 "}
+          {new Date().getFullYear()}
+          {" Akira"}
         </div>
       </div>
     </footer>
