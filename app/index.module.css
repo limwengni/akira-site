@@ -2280,211 +2280,313 @@ select.inputField {
 
 .profileWrapper {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+  position: relative;
+  background: linear-gradient(180deg, #5f87ff 0%, #5171e0 40%, #445dc4 70%, #4f4db7 100%);
+  padding: 18px 20px 28px;
+  overflow-x: hidden;
 }
 
 .profileContainer {
-  max-width: 1200px;
+  position: relative;
   width: 100%;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 30px;
-  height: 85vh;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  align-items: start;
+  padding-top: 18px;
+}
+
+.profileWrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(153, 160, 246, 0.5) 30%,
+    rgba(127, 135, 238, 0.7) 60%,
+    rgba(158, 156, 229, 1) 100%
+  );
+  -webkit-mask-image: radial-gradient(circle, #000 0.8px, transparent 1px);
+  -webkit-mask-size: 14px 14px;
+  -webkit-mask-repeat: repeat;
+  mask-image: radial-gradient(circle, #000 0.8px, transparent 1px);
+  mask-size: 14px 14px;
+  mask-repeat: repeat;
 }
 
 /* LEFT SIDE - GALLERY */
 .profileLeft {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 15px;
+  position: sticky;
+  top: 18px;
+  background: rgba(12, 13, 18, 0.82);
+  box-shadow: 0 14px 30px rgba(16, 12, 45, 0.22);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border: 2px dashed rgba(255, 255, 255, 0.1);
-  overflow: hidden; /* In case you add images later */
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  min-height: 620px;
+  display: none;
 }
 
-.galleryPlaceholder {
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 1.5rem;
-  font-weight: bold;
-  letter-spacing: 3px;
+.profileMediaFrame {
+  width: 100%;
+  aspect-ratio: 4 / 5.5;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profileMediaFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profileMediaCaption {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profileMediaCaption strong {
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.profileMediaLabel {
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
 }
 
 /* RIGHT SIDE - DATA */
 .profileRight {
-  background: #ffffff;
-  border-radius: 15px;
-  padding: 30px 50px 20px 50px;
+  background: rgba(12, 13, 18, 0.82);
+  padding: 22px;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overflow-y: auto; /* Keep scrollbar for overflow content */
+  box-shadow: 0 14px 30px rgba(16, 12, 45, 0.22);
   display: flex;
   flex-direction: column;
+  gap: 18px;
+  min-height: 620px;
 }
 
 .profileCloseBtn {
   position: absolute;
-  top: 0px;
-  right: 0px;
-  background: #000;
-  color: #fff;
-  border: none;
-  width: 35px;
-  height: 35px;
-  border-radius: 0 10px 0 10px;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
   z-index: 10;
 }
 
 .profileCloseBtn:hover {
-  background: #333;
+  background: rgba(95, 135, 255, 0.14);
+  border-color: rgba(95, 135, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.profileUtilityBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 56px;
+}
+
+.profilePageTag {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 /* HEADER */
 .profileHeader {
-  display: flex;
-  align-items: stretch;
-  gap: 30px;
-  margin-bottom: 30px;
-  border-bottom: 4px solid var(--border-dark, #111);
-  padding-bottom: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  align-items: end;
+  gap: 20px;
+  padding-bottom: 18px;
+  padding-right: 64px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nameRoleBox {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: flex-start;
-  flex-shrink: 0;
+  gap: 10px;
+  flex: 1 1 auto;
+}
+
+.profileKicker {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.54);
 }
 
 .profileHeader h1 {
-  font-size: 1.5rem; /* Massive, bold name */
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
   font-weight: 900;
   text-transform: uppercase;
-  font-style: italic;
-  line-height: 0.9;
-  margin: 0 0 10px 0; /* Space between name and role */
-  color: var(--border-dark, #111);
+  line-height: 0.92;
+  margin: 0;
+  color: var(--surface, #fff);
 }
 
 .profileRole {
-  background: var(--border-dark, #111);
-  color: var(--surface, #fff);
-  padding: 4px 10px;
-  font-size: 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 6px 12px;
+  font-size: 0.68rem;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  transform: skewX(-10deg); /* Slanted to match the cards! */
+  border-radius: 999px;
 }
 
 .profileQuote {
-  display: flex;
-  align-items: center; /* Centers the quote vertically next to the big name */
-  font-size: 0.85rem;
+  width: 100%;
+  margin-top: 0;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid rgba(95, 135, 255, 0.8);
+  font-size: 0.78rem;
   font-style: italic;
   font-weight: 800;
-  color: #555;
-  border-left: 4px solid var(--border-dark, #111); /* Thick tactical separator */
-  padding-left: 30px;
+  color: rgba(255, 255, 255, 0.72);
   text-transform: uppercase;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* TOP SECTION - IMAGE & QUICK STATS */
 .profileTop {
-  display: flex;
-  gap: 25px;
-  margin-bottom: 15px;
-  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
 }
 
 .profileImageBox {
-  width: 120px;
-  height: 160px;
-  border: 3px solid #000;
-  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 4 / 5.2;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .profileImageBox img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .profileQuickStats {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  font-family: "Courier New", monospace;
-  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 18px;
 }
 
 .statRow {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px dashed #ddd;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.statLabel {
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .statValue {
-  font-weight: bold;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: right;
+  text-transform: uppercase;
 }
 
 /* SECONDARY STATS */
 .profileSecondaryStats {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
-  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
 }
 
 .statBox2 {
-  flex: 1;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 5px 5px;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 12px;
   min-width: 0;
 }
 
 .statBoxLabel {
-  font-size: 0.6rem;
-  color: #888;
-  margin-bottom: 2px;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+  font-size: 0.64rem;
+  color: rgba(255, 255, 255, 0.54);
+  margin-bottom: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .statBoxValue {
-  font-size: 0.85rem;
-  font-weight: bold;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.92);
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 /* CONTENT SECTIONS */
 .profilePage {
   animation: fadeIn 0.3s;
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 18px;
+  min-height: 0;
 }
 
 @keyframes fadeIn {
@@ -2499,82 +2601,75 @@ select.inputField {
 }
 
 .profileSection {
-  margin-bottom: 15px;
   flex: 1;
-  overflow-y: auto;
+  min-height: 240px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
 }
 
 .profileSection h3 {
-  font-size: 0.85rem;
-  border-bottom: 2px solid #000;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.92);
+  border-bottom: 2px solid rgba(95, 135, 255, 0.8);
   display: inline-block;
-  margin-bottom: 15px;
-  padding-bottom: 5px;
+  margin-bottom: 16px;
+  padding-bottom: 6px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .profileSection p,
 .profileSection div {
   line-height: 1.7;
-  color: #333;
-  font-size: 0.85rem;
-}
-
-.profileTrivia {
-  background: #fff9c4;
-  padding: 15px;
-  border: 1px solid #e6db55;
-  transform: rotate(0.5deg);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.05);
-  overflow-y: auto;
-  height: fit-content;
-  width: 85%;
-  font-size: 0.75rem;
-  font-family: "Courier New", monospace;
-}
-
-.profileTrivia h3 {
-  border-bottom: 1px solid #000;
-  display: inline-block;
-  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.88rem;
 }
 
 .noData {
   font-style: italic;
-  color: #999;
-  font-family: "Courier New", monospace;
+  color: rgba(255, 255, 255, 0.52);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 /* PAGE NAVIGATION */
 .profileNav {
   display: flex;
   gap: 10px;
-  padding-top: 15px;
-  border-top: 2px solid #eee;
+  padding-top: 4px;
   flex-shrink: 0;
 }
 
 .profileNavBtn {
-  flex: 1;
-  padding: 4px;
-  background: #f5f5f5;
-  border: 2px solid #ddd;
+  flex: 1 1 0;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
-  font-weight: bold;
-  font-size: 0.75rem;
-  transition: all 0.2s;
+  font-weight: 900;
+  font-size: 0.7rem;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .profileNavBtn:hover {
-  background: #eee;
-  border-color: #ccc;
+  background: rgba(95, 135, 255, 0.14);
+  border-color: rgba(95, 135, 255, 0.28);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .profileNavBtn.active {
-  background: #000;
-  color: #fff;
-  border-color: #000;
+  background: #ffffff;
+  color: #111111;
+  border-color: #ffffff;
 }
 
 /* LOADING & ERROR STATES */
@@ -2586,23 +2681,27 @@ select.inputField {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #000;
+  color: var(--surface);
+  background: linear-gradient(180deg, #5f87ff 0%, #445dc4 100%);
+  padding: 24px;
 }
 
 .profileError h2 {
   font-size: 3rem;
   margin-bottom: 10px;
-  color: #ff4444;
+  color: #ffffff;
+  letter-spacing: 0.08em;
 }
 
 .profileError button {
   margin-top: 20px;
   padding: 12px 30px;
-  background: #fff;
-  border: none;
+  background: #ffffff;
+  border: 3px solid #ffffff;
   cursor: pointer;
-  font-weight: bold;
-  border-radius: 5px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 /* ========================================
@@ -2637,17 +2736,16 @@ select.inputField {
   }
 
   .profileContainer {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
-    height: 90vh;
   }
 
   .profileLeft {
-    display: flex;
+    display: none;
   }
 
   .profileRight {
-    padding: 40px 30px;
+    padding: 20px;
   }
 
   .profileHeader h1 {
@@ -2842,7 +2940,7 @@ select.inputField {
   }
 
   .profileWrapper {
-    padding: 10px;
+    padding: 0;
   }
 
   .outerViewport {
@@ -2853,6 +2951,45 @@ select.inputField {
     width: 100%;
     padding-inline: 0px;
     max-width: 100%;
+  }
+
+  .profileContainer {
+    gap: 12px;
+    padding-top: 0;
+  }
+
+  .profileRight {
+    padding: 16px;
+    min-height: calc(100vh - 12px);
+  }
+
+  .profileUtilityBar {
+    padding-right: 40px;
+  }
+
+  .profilePageTag {
+    padding: 9px 12px;
+  }
+
+  .profileHeader h1 {
+    font-size: 1.75rem;
+  }
+
+  .profileTop {
+    gap: 14px;
+  }
+
+  .profileImageBox {
+    max-width: 180px;
+  }
+
+  .profileQuickStats,
+  .profileSection {
+    padding: 16px;
+  }
+
+  .profileSecondaryStats {
+    grid-template-columns: 1fr;
   }
 
   .footerBar {
@@ -2892,8 +3029,7 @@ select.inputField {
 
   .profileContainer {
     grid-template-columns: 1fr;
-    gap: 0;
-    height: auto;
+    gap: 16px;
     min-height: calc(100vh - 20px);
   }
 
@@ -2902,23 +3038,29 @@ select.inputField {
   }
 
   .profileRight {
-    max-height: none;
     min-height: calc(100vh - 20px);
-    border-radius: 10px;
+  }
+
+  .profileUtilityBar {
+    flex-wrap: wrap;
+    padding-right: 44px;
+  }
+
+  .profileHeader {
+    grid-template-columns: 1fr;
+    align-items: start;
   }
 
   .profileHeader h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .profileTop {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
   }
 
   .profileImageBox {
-    width: 180px;
-    height: 240px;
+    max-width: 220px;
   }
 
   .profileQuickStats {
@@ -2926,15 +3068,10 @@ select.inputField {
   }
 
   .profileSecondaryStats {
-    flex-direction: row;
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .profileCloseBtn {
-    /* Anchors it to the very corner */
-    top: 0;
-    right: 0;
-    border-radius: 0 10px 0 10px;
     width: 30px;
     height: 30px;
   }
@@ -2957,6 +3094,10 @@ select.inputField {
 
   .profileNavBtn {
     flex: 1 1 calc(50% - 5px);
+  }
+
+  .profileSection {
+    min-height: 0;
   }
 
   .twoColLore {
