@@ -16,6 +16,7 @@ export default function ClientLayout({
   const pathname = usePathname();
   const isCharacterProfile =
     pathname?.startsWith("/characters/") && pathname !== "/characters";
+  const useSidebarLayout = !isCharacterProfile && pathname !== "/characters";
 
   const { isLoggedIn, login, logout } = useAuth();
 
@@ -61,8 +62,8 @@ export default function ClientLayout({
               <Header menuItems={menuItems} pathname={pathname ?? ""} />
             )}
 
-            <main className={isCharacterProfile ? "" : styles.mainGrid}>
-              {!isCharacterProfile && (
+            <main className={useSidebarLayout ? styles.mainGrid : ""}>
+              {useSidebarLayout && (
                 <aside className={styles.sidebar}>
                   <div id="page-sidebar-slot"></div>
                 </aside>

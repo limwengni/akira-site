@@ -652,13 +652,33 @@
   gap: 15px;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+}
+
 /* --- SEARCH BAR --- */
 .searchWrapper {
   position: relative;
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   align-items: center;
   max-width: 360px;
+  min-width: 220px;
+}
+
+.resultsCount {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .searchIcon {
@@ -721,6 +741,7 @@ input.searchInput {
 /* --- DROPDOWN FILTER LOGIC --- */
 .dropdownWrapper {
   position: relative;
+  flex-shrink: 0;
 }
 .dropdownToggle {
   background: rgba(255, 255, 255, 0.12);
@@ -811,7 +832,7 @@ input.searchInput {
 
 .archiveGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 18px;
   position: relative;
   z-index: 5;
@@ -886,8 +907,13 @@ input.searchInput {
 }
 
 .characterListingPanel {
-  padding-bottom: 25px;
-  margin-bottom: 25px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  min-height: auto;
+}
+
+.characterListingPanel.pagePanel {
+  overflow: visible;
 }
 
 
@@ -1206,14 +1232,21 @@ input.searchInput {
    ========================================= */
 
 .paginationFooter {
-  margin-top: auto; /* Push to bottom */
-  padding-top: 40px;
+  margin-top: 20px;
+  padding-top: 16px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   position: relative;
   z-index: 5;
 }
+
+.pageNavButtons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pageBtn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1240,6 +1273,13 @@ input.searchInput {
   display: flex;
   gap: 10px;
 }
+
+.pageIndicator {
+  min-width: 38px;
+  padding-inline: 10px;
+  cursor: default;
+}
+
 .numBtn {
   width: 38px;
   height: 38px;
@@ -2087,6 +2127,48 @@ select.inputField {
   transform: translateY(-3px) scale(1.08);
 }
 
+.backToTopBtn {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  background: #5f87ff;
+  color: var(--surface);
+  border: 3px solid #8fa9ff;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.3);
+  z-index: 89;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.backToTopBtn:hover {
+  transform: translateY(-3px) scale(1.08);
+  background: #7a9cff;
+  border-color: #bfd0ff;
+}
+
+.backToTopBtnRaised {
+  bottom: 104px;
+}
+
+.floatingBtnFooterSafe {
+  bottom: 96px;
+}
+
+.backToTopBtnRaisedFooterSafe {
+  bottom: 156px;
+}
+
 /* Cropper & Loader */
 .cropperModal {
   position: fixed;
@@ -2530,8 +2612,9 @@ select.inputField {
 /* Tablet */
 @media (max-width: 1024px) {
   .pageContainer {
-    width: 95%;
+    padding-inline: 18px;
     max-width: 100%;
+    box-sizing: border-box;
     border-width: 4px;
   }
 
@@ -2578,6 +2661,25 @@ select.inputField {
   .statBoxValue {
     font-size: 0.9rem;
   }
+
+  .characterListingPanel .archiveGrid,
+  .characterListingPanel.pagePanel .archiveGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .characterListingPanel .characterCardRole,
+  .characterListingPanel.pagePanel .characterCardRole {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 0.54rem;
+    letter-spacing: 0.08em;
+  }
+
+  .characterListingPanel .characterCardName,
+  .characterListingPanel.pagePanel .characterCardName {
+    font-size: 0.92rem;
+  }
 }
 
 @media (max-width: 900px) {
@@ -2603,7 +2705,7 @@ select.inputField {
   }
 
   .headerControls {
-    gap: 12px;
+    gap: 30px;
   }
 
   .searchWrapper {
@@ -2663,10 +2765,6 @@ select.inputField {
 
   .panelContent {
     display: block;
-  }
-
-  .topNav {
-    margin: 0;
   }
 
   .topNavList {
@@ -2753,6 +2851,7 @@ select.inputField {
 
   .pageContainer {
     width: 100%;
+    padding-inline: 0px;
     max-width: 100%;
   }
 
@@ -2763,69 +2862,6 @@ select.inputField {
   .characterListingPanel {
     padding-bottom: 20px;
     margin-bottom: 20px;
-  }
-
-  .characterListingPanel .pagePanel,
-  .characterListingPanel.pagePanel {
-    padding: 16px;
-  }
-
-  .characterListingPanel .pageHeader,
-  .characterListingPanel.pagePanel .pageHeader {
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-  }
-
-  .characterListingPanel .headerControls,
-  .characterListingPanel.pagePanel .headerControls {
-    gap: 10px;
-  }
-
-  .characterListingPanel .searchWrapper,
-  .characterListingPanel.pagePanel .searchWrapper {
-    max-width: none;
-    width: 100%;
-  }
-
-  .characterListingPanel .searchInput,
-  .characterListingPanel.pagePanel .searchInput {
-    height: 40px;
-    font-size: 0.8rem;
-    padding: 9px 36px 9px 38px;
-  }
-
-  .characterListingPanel .dropdownWrapper,
-  .characterListingPanel.pagePanel .dropdownWrapper {
-    width: 100%;
-  }
-
-  .characterListingPanel .dropdownToggle,
-  .characterListingPanel.pagePanel .dropdownToggle {
-    width: 100%;
-    height: 40px;
-    padding: 0 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.72rem;
-  }
-
-  .characterListingPanel .dropdownMenu,
-  .characterListingPanel.pagePanel .dropdownMenu {
-    width: 100%;
-  }
-
-  .characterListingPanel .archiveGrid,
-  .characterListingPanel.pagePanel .archiveGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .characterListingPanel .characterCard,
-  .characterListingPanel .characterCardSkeleton,
-  .characterListingPanel.pagePanel .characterCard,
-  .characterListingPanel.pagePanel .characterCardSkeleton {
-    border-radius: 16px;
   }
 
   .characterListingPanel .characterCardMeta,
@@ -2933,8 +2969,8 @@ select.inputField {
 
 /* --- PHONES (Below 600px) --- */
 @media (max-width: 600px) {
-  .topNav {
-    margin: 0;
+  .pageNavButtons {
+    gap: 10px;
   }
 
   .topNavList {
@@ -2959,6 +2995,7 @@ select.inputField {
   .pageContainer {
     width: 100%;
     max-width: 100%;
+    padding-inline: 0px;
     border-left: none;
     border-right: none;
     border-top: none;
@@ -2988,29 +3025,20 @@ select.inputField {
     padding-inline: 8px;
   }
 
-  .characterListingPanel,
-  .characterListingPanel.pagePanel {
-    padding-bottom: 18px;
-    margin-bottom: 18px;
-    min-height: auto;
-  }
-
-  .characterListingPanel .pagePanel,
-  .characterListingPanel.pagePanel {
-    padding: 14px;
-  }
-
-  .characterListingPanel .pageHeader,
-  .characterListingPanel.pagePanel .pageHeader {
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-  }
-
   .characterListingPanel .headerControls,
   .characterListingPanel.pagePanel .headerControls {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .characterListingPanel .headerActions,
+  .characterListingPanel.pagePanel .headerActions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: stretch;
   }
 
   .characterListingPanel .searchWrapper,
@@ -3034,6 +3062,14 @@ select.inputField {
     left: 12px;
     width: 14px;
     height: 14px;
+  }
+
+  .characterListingPanel .resultsCount,
+  .characterListingPanel.pagePanel .resultsCount {
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    white-space: normal;
+    margin-bottom: 2px;
   }
 
   .characterListingPanel .dropdownToggle,
@@ -3151,17 +3187,15 @@ select.inputField {
   .paginationFooter {
     gap: 10px;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding-top: 10px;
   }
 
-  .pageNumbers {
+  .pageNavButtons {
     order: 0;
-    width: auto;
     flex: 0 0 auto;
-    justify-content: center;
-    gap: 8px;
+    gap: 10px;
   }
 
   .pageBtn {
@@ -3221,6 +3255,25 @@ select.inputField {
     right: 20px;
     width: 45px;
     height: 45px;
+  }
+
+  .backToTopBtn {
+    right: 20px;
+    bottom: 20px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .backToTopBtnRaised {
+    bottom: 78px;
+  }
+
+  .floatingBtnFooterSafe {
+    bottom: 74px;
+  }
+
+  .backToTopBtnRaisedFooterSafe {
+    bottom: 128px;
   }
 
   .pagePanel {
