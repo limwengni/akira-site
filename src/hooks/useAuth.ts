@@ -21,14 +21,13 @@ export const useAuth = () => {
   const login = async (email: string, password: string) => {
     const { error } = await authService.login(email, password);
     if (error) {
-      alert("Authentication failed: " + error.message);
-      return { success: false };
+      return { success: false, error: error.message };
     } else {
       setIsLoggedIn(true);
       setTimeout(() => {
         window.location.reload();
       }, 100);
-      return { success: true };
+      return { success: true, error: null };
     }
   };
 

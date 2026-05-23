@@ -211,20 +211,21 @@ export const useCharacters = () => {
   };
 
   const handleDelete = async (id: number, slug: string) => {
-    if (!confirm(`CONFIRM PERMANENT DELETION OF ${slug.toUpperCase()}?`))
-      return;
-
     const originalList = [...charList];
     mutate(charList.filter((c: any) => c.id !== id), false);
 
     try {
       await characterService.delete(id, slug);
       mutate();
+      return { success: true, error: null };
     } catch (err: any) {
       console.error("Deletion failed:", err);
-      alert("Deletion Error: " + err.message);
       // Revert the UI if the database failed to delete
       mutate(originalList, false);
+      return {
+        success: false,
+        error: err.message || "Deletion failed. Please try again.",
+      };
     }
   };
 

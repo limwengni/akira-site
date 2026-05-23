@@ -34,6 +34,9 @@ export const Footer = ({
   return (
     <footer className={styles.mangaFooter}>
       <div className={styles.footerBar}>
+        <div className={styles.footerMetaTag}>
+          <span>Last Updated:</span> 23 May 2026
+        </div>
         <div className={styles.copyrightTag} onClick={handleSecretClick}>
           {"Copyright \u00A9 "}
           {new Date().getFullYear()}

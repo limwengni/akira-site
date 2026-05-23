@@ -61,6 +61,12 @@ export default function Characters() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingChar, setEditingChar] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [charPendingDelete, setCharPendingDelete] = useState<{
+    id: number;
+    slug: string;
+    name: string;
+  } | null>(null);
+  const [deleteError, setDeleteError] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
 
@@ -92,6 +98,27 @@ export default function Characters() {
       const input = document.getElementById("iconFile") as HTMLInputElement;
       if (input) input.value = "";
     }
+  };
+
+  const requestDelete = (id: number, slug: string, name: string) => {
+    setDeleteError("");
+    setCharPendingDelete({ id, slug, name });
+  };
+
+  const confirmDelete = async () => {
+    if (!charPendingDelete) return;
+
+    const result = await handleDelete(charPendingDelete.id, charPendingDelete.slug);
+
+    if (result?.success) {
+      setCharPendingDelete(null);
+      setDeleteError("");
+      return;
+    }
+
+    setDeleteError(
+      result?.error || "We couldn't delete this record right now. Please try again.",
+    );
   };
   //#endregion
 
@@ -325,7 +352,7 @@ export default function Characters() {
                     char={char}
                     isLoggedIn={isLoggedIn}
                     onEdit={setEditingChar}
-                    onDelete={handleDelete}
+                    onDelete={requestDelete}
                   />
                 </div>
               ))
@@ -490,6 +517,57 @@ export default function Characters() {
             setMainFile(null);
           }}
         />
+      )}
+
+      {charPendingDelete && (
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.modalContent} ${styles.authModalContent}`}>
+            <button
+              type="button"
+              className={styles.authModalClose}
+              onClick={() => {
+                setCharPendingDelete(null);
+                setDeleteError("");
+              }}
+              aria-label="Close delete dialog"
+            >
+              x
+            </button>
+            <header className={styles.modalHeader}>
+              <h3 className={styles.authModalTitle}>CONFIRM DELETION</h3>
+            </header>
+            <div className={styles.authModalBody}>
+              <p className={styles.authModalText}>
+                Permanently delete <strong>{charPendingDelete.name}</strong> from
+                the archive? This action cannot be undone.
+              </p>
+              {deleteError && (
+                <p className={styles.authErrorMessage} role="alert">
+                  {deleteError}
+                </p>
+              )}
+              <div className={`${styles.modalActions} ${styles.authModalActions}`}>
+                <button
+                  type="button"
+                  className={`${styles.saveBtn} ${styles.authPrimaryBtn} ${styles.dangerActionBtn}`}
+                  onClick={confirmDelete}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.closeBtn} ${styles.authSecondaryBtn}`}
+                  onClick={() => {
+                    setCharPendingDelete(null);
+                    setDeleteError("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -7,8 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
   faTrash,
-  faArrowRight,
-  faArrowLeft,
+  faChevronDown,
+  faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface CharacterFormProps {
@@ -64,12 +64,9 @@ export const CharacterForm = ({
   handleSave,
   onClose,
 }: CharacterFormProps) => {
-  // Birthday Parsing Logic
-  const bday = editingChar?.stats?.[0]?.birthday;
-  const [_, month, day] = bday ? bday.split("-") : ["", "01", "01"];
-
   // --- States ---
   const [formStep, setFormStep] = useState(1);
+  const [showStageNav, setShowStageNav] = useState(false);
 
   // Lore Lists
   const [abilities, setAbilities] = useState<{ name: string; desc: string }[]>(
@@ -250,18 +247,40 @@ export const CharacterForm = ({
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalContent} style={{ maxWidth: "900px" }}>
-        <header className={styles.modalHeader}>
+      <div
+        className={`${styles.modalContent} ${styles.characterFormModal}`}
+        style={{ maxWidth: "900px" }}
+      >
+        <header className={`${styles.modalHeader} ${styles.characterFormHeader}`}>
           <div className={styles.headerTop}>
-            <h3>
-              {showAddForm
-                ? "// INITIALIZING NEW ENTRY"
-                : `// EDITING: ${editingChar?.name}`}
-            </h3>
-            {/* <span className={styles.stepIndicator}>STEP {formStep} / 3</span> */}
+            <div>
+              <p className={styles.formEyebrow}>Character Archive Console</p>
+              <h3>
+                {showAddForm
+                  ? "INITIALIZING NEW ENTRY"
+                  : `EDITING: ${editingChar?.name}`}
+              </h3>
+            </div>
           </div>
 
-          <nav className={styles.formNav}>
+          <div className={styles.formHeaderActions}>
+            <span className={styles.stepIndicator}>STEP {formStep} / 3</span>
+            <button
+              type="button"
+              className={styles.formNavToggle}
+              onClick={() => setShowStageNav((open) => !open)}
+              aria-expanded={showStageNav}
+              aria-label={
+                showStageNav ? "Hide stage navigation" : "Show stage navigation"
+              }
+            >
+              <FontAwesomeIcon icon={showStageNav ? faChevronUp : faChevronDown} />
+            </button>
+          </div>
+
+          <nav
+            className={`${styles.formNav} ${showStageNav ? styles.formNavOpen : styles.formNavCollapsed}`}
+          >
             {/* The Buttons */}
             <div className={styles.navButtons}>
               <button
@@ -302,12 +321,15 @@ export const CharacterForm = ({
           </nav>
         </header>
 
-        <form onSubmit={onSubmit}>
-          <div style={{ display: formStep === 1 ? "block" : "none" }}>
+        <form onSubmit={onSubmit} className={styles.characterForm}>
+          <div
+            className={styles.formStepPanel}
+            style={{ display: formStep === 1 ? "block" : "none" }}
+          >
             <div className={styles.formDashboard}>
               {/* LEFT COLUMN: VISUALS */}
               <div className={styles.formSidebar}>
-                <div>
+                <div className={styles.assetPanel}>
                   <label className={styles.fieldLabel}>MAIN SPLASH ART</label>
                   <div className={styles.dropZoneContainer}>
                     <div
@@ -362,7 +384,7 @@ export const CharacterForm = ({
                   </div>
                 </div>
 
-                <div>
+                <div className={styles.assetPanel}>
                   <label className={styles.fieldLabel}>SYSTEM ICON</label>
                   <div className={styles.dropZoneContainer}>
                     <div
@@ -419,7 +441,7 @@ export const CharacterForm = ({
               </div>
 
               {/* RIGHT COLUMN: DATA */}
-              <div className={styles.formMain}>
+              <div className={`${styles.formMain} ${styles.formSectionCard}`}>
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.fieldLabel}>SUBJECT NAME</label>
@@ -582,7 +604,10 @@ export const CharacterForm = ({
               </div>
             </div>
           </div>
-          <div style={{ display: formStep === 2 ? "block" : "none" }}>
+          <div
+            className={styles.formStepPanel}
+            style={{ display: formStep === 2 ? "block" : "none" }}
+          >
             <div className={styles.formDashboardPage2}>
               <div className={styles.loreGrid}>
                 <div>
@@ -819,43 +844,14 @@ export const CharacterForm = ({
                     ))}
                   </ul>
                 </div>
-                <div className={styles.twoColLore}>
-                  <div>
-                    <label className={styles.fieldLabel}>LABELS</label>
-                    <div className={styles.listInputRow}>
-                      <input
-                        value={tempLabel}
-                        onChange={(e) => setTempLabel(e.target.value)}
-                        className={styles.inputField}
-                      />
-                      <button
-                        type="button"
-                        onClick={addLabel}
-                        className={styles.addListBtn}
-                      >
-                        <FontAwesomeIcon icon={faPlus} />
-                      </button>
-                    </div>
-                    <div className={styles.chipContainer}>
-                      {labels.map((l, i) => (
-                        <div key={i} className={styles.loreChip}>
-                          {l}{" "}
-                          <FontAwesomeIcon
-                            className={styles.deleteIcon}
-                            icon={faTrash}
-                            onClick={() =>
-                              setLabels(labels.filter((_, idx) => idx !== i))
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                {/* Labels section temporarily hidden from the form UI */}
               </div>
             </div>
           </div>
-          <div style={{ display: formStep === 3 ? "block" : "none" }}>
+          <div
+            className={styles.formStepPanel}
+            style={{ display: formStep === 3 ? "block" : "none" }}
+          >
             <div className={styles.formDashboardPage3}>
               <div className={styles.loreSectionFull}>
                 <label className={styles.fieldLabel}>Galleries</label>

@@ -16,7 +16,8 @@ export default function ClientLayout({
   const pathname = usePathname();
   const isCharacterProfile =
     pathname?.startsWith("/characters/") && pathname !== "/characters";
-  const useSidebarLayout = !isCharacterProfile && pathname !== "/characters";
+  const useSidebarLayout =
+    pathname !== "/" && !isCharacterProfile && pathname !== "/characters";
 
   const { isLoggedIn, login, logout } = useAuth();
 
@@ -24,6 +25,7 @@ export default function ClientLayout({
   const [showLogout, setShowLogout] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   const menuItems = [
     { id: "01", label: "Introduction", href: "/" },
@@ -36,11 +38,20 @@ export default function ClientLayout({
   const onLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      alert("Please enter both email and password.");
+      setLoginError("Please enter both your email and password.");
       return;
     }
+    setLoginError("");
     const result = await login(email, password);
-    if (result.success) setShowLogin(false);
+    if (result.success) {
+      setShowLogin(false);
+      return;
+    }
+    setLoginError(
+      result.error === "Invalid login credentials"
+        ? "That email or password doesn't match our admin account."
+        : result.error || "We couldn't log you in right now. Please try again.",
+    );
   };
 
   const onLogoutSubmit = async () => {
@@ -91,7 +102,10 @@ export default function ClientLayout({
             <button
               type="button"
               className={styles.authModalClose}
-              onClick={() => setShowLogin(false)}
+              onClick={() => {
+                setShowLogin(false);
+                setLoginError("");
+              }}
               aria-label="Close login dialog"
             >
               ×
@@ -99,19 +113,21 @@ export default function ClientLayout({
             <header className={styles.modalHeader}>
               <h3 className={styles.authModalTitle}>ADMIN LOGIN</h3>
             </header>
-            <form onSubmit={onLoginSubmit}>
+            <form onSubmit={onLoginSubmit} className={styles.authModalBody}>
               <div className={styles.authInputShell}>
-                <span className={styles.authInputLabel}>Username/Email</span>
+                <span className={styles.authInputLabel}>Admin Email</span>
                 <input
                   type="email"
                   placeholder=""
                   className={`${styles.inputField} ${styles.authModalInput}`}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (loginError) setLoginError("");
+                  }}
                   required
                 />
               </div>
-              <div style={{ paddingBottom: "12px" }}></div>
               <div className={styles.authInputShell}>
                 <span className={styles.authInputLabel}>Password</span>
                 <input
@@ -119,10 +135,18 @@ export default function ClientLayout({
                   placeholder=""
                   className={`${styles.inputField} ${styles.authModalInput}`}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (loginError) setLoginError("");
+                  }}
                   required
                 />
               </div>
+              {loginError && (
+                <p className={styles.authErrorMessage} role="alert">
+                  {loginError}
+                </p>
+              )}
               <div className={`${styles.modalActions} ${styles.authModalActions}`}>
                 <button type="submit" className={`${styles.saveBtn} ${styles.authPrimaryBtn}`}>
                   Log In
@@ -136,7 +160,7 @@ export default function ClientLayout({
       {/* Logout Modal */}
       {showLogout && (
         <div className={styles.modalOverlay}>
-          <div className={`${styles.modalContent} ${styles.authModalContent} ${styles.authModalNoClose}`}>
+          <div className={`${styles.modalContent} ${styles.authModalContent}`}>
             <button
               type="button"
               className={styles.authModalClose}
@@ -148,19 +172,21 @@ export default function ClientLayout({
             <header className={styles.modalHeader}>
               <h3 className={styles.authModalTitle}>CONFIRM LOGOUT</h3>
             </header>
-            <p className={styles.authModalText}>
-              Are you sure you want to log out of admin mode?
-            </p>
-            <div className={`${styles.modalActions} ${styles.authModalActions}`}>
-              <button className={`${styles.saveBtn} ${styles.authPrimaryBtn}`} onClick={onLogoutSubmit}>
-                Confirm
-              </button>
-              <button
-                className={`${styles.closeBtn} ${styles.authSecondaryBtn}`}
-                onClick={() => setShowLogout(false)}
-              >
-                Cancel
-              </button>
+            <div className={styles.authModalBody}>
+              <p className={styles.authModalText}>
+                Are you sure you want to log out of admin mode?
+              </p>
+              <div className={`${styles.modalActions} ${styles.authModalActions}`}>
+                <button className={`${styles.saveBtn} ${styles.authPrimaryBtn}`} onClick={onLogoutSubmit}>
+                  Confirm
+                </button>
+                <button
+                  className={`${styles.closeBtn} ${styles.authSecondaryBtn}`}
+                  onClick={() => setShowLogout(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { getRoleLabel } from "../constants/character";
 import styles from "../../app/index.module.css";
 
@@ -9,7 +9,7 @@ interface CharacterCardProps {
   char: any;
   isLoggedIn: boolean;
   onEdit: (char: any) => void;
-  onDelete: (id: number, slug: string) => void;
+  onDelete: (id: number, slug: string, name: string) => void;
 }
 
 export const CharacterCard = ({
@@ -38,11 +38,11 @@ export const CharacterCard = ({
               <FontAwesomeIcon icon={faEdit} />
             </button>
             <button
-              className={styles.characterCardActionBtn}
-              onClick={() => onDelete(char.id, char.slug)}
+              className={`${styles.characterCardActionBtn} ${styles.characterCardDeleteBtn}`}
+              onClick={() => onDelete(char.id, char.slug, char.name)}
               title="Delete"
             >
-              <FontAwesomeIcon icon={faXmark} />
+              <FontAwesomeIcon icon={faTrashCan} />
             </button>
           </div>
         )}

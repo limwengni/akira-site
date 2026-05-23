@@ -11,7 +11,7 @@
   --screentone-grey: #cccccc;
   --info-color: #2563eb;
   --warn-color: #fca311;
-  --error-color: #d00;
+  --error-color: #e06786;
   --success-color: #10b981;
 
   --font-display: var(--font-rubik), sans-serif;
@@ -27,6 +27,7 @@
 
 html {
   font-size: 85%;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -34,6 +35,7 @@ body {
   color: var(--text);
   font-family: var(--font-main);
   overflow-x: hidden;
+  overflow-y: scroll;
   background-image: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
