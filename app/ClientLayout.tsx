@@ -16,6 +16,8 @@ export default function ClientLayout({
   const pathname = usePathname();
   const isCharacterProfile =
     pathname?.startsWith("/characters/") && pathname !== "/characters";
+  const isCardRoute = pathname === "/card";
+  const isCommissionRoute = pathname === "/commissions";
   const useSidebarLayout =
     pathname !== "/" && !isCharacterProfile && pathname !== "/characters";
 
@@ -59,7 +61,7 @@ export default function ClientLayout({
     setShowLogout(false);
   };
 
-  if (isCharacterProfile) {
+  if (isCharacterProfile || isCardRoute || isCommissionRoute) {
     return <>{children}</>;
   }
 
