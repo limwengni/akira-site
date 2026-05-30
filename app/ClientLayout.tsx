@@ -19,7 +19,10 @@ export default function ClientLayout({
   const isCardRoute = pathname === "/card";
   const isCommissionRoute = pathname === "/commissions";
   const useSidebarLayout =
-    pathname !== "/" && !isCharacterProfile && pathname !== "/characters";
+    pathname !== "/" &&
+    !isCharacterProfile &&
+    pathname !== "/characters" &&
+    pathname !== "/card";
 
   const { isLoggedIn, login, logout } = useAuth();
 
@@ -62,7 +65,16 @@ export default function ClientLayout({
   };
 
   if (isCharacterProfile || isCardRoute || isCommissionRoute) {
-    return <>{children}</>;
+    return (
+      <div className={styles.outerViewport}>
+        <div id="mangaPage" className={styles.pageContainer}>
+          <div className={styles.halftoneBg}></div>
+          <div className={styles.contentWrapper}>
+            <main>{children}</main>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -189,57 +189,59 @@ const socialIcons = [
 
 export default function CardPage() {
   return (
-    <main className={styles.cardRoute}>
-      <section className={styles.cardShell}>
-        <div className={styles.cardHero}>
-          <div className={styles.cardAvatarShell}>
-            <span className={styles.cardAvatarRipple} aria-hidden="true"></span>
-            <span
-              className={styles.cardAvatarRippleDelayed}
-              aria-hidden="true"
-            ></span>
-            <img
-              src="https://ebgysbqoofuqyqoypnhi.supabase.co/storage/v1/object/public/page-assets/Avatars/akira.jpg"
-              alt="Akira Chizu avatar"
-              className={styles.cardAvatar}
-            />
+    <section className={styles.mainContent}>
+      <div className={styles.cardPagePanel}>
+        <section className={styles.cardShell}>
+          <div className={styles.cardHero}>
+            <div className={styles.cardAvatarShell}>
+              <span className={styles.cardAvatarRipple} aria-hidden="true"></span>
+              <span
+                className={styles.cardAvatarRippleDelayed}
+                aria-hidden="true"
+              ></span>
+              <img
+                src="https://ebgysbqoofuqyqoypnhi.supabase.co/storage/v1/object/public/page-assets/Avatars/akira.jpg"
+                alt="Akira Chizu avatar"
+                className={styles.cardAvatar}
+              />
+            </div>
+
+            <h1 className={styles.cardTitle}>AKIRA CHIZU (起司)</h1>
+            <div className={styles.cardDivider}></div>
+            <p className={styles.cardSubtitle}>
+              MALAYSIAN ANIME AND CHIBI ARTIST
+            </p>
           </div>
 
-          <h1 className={styles.cardTitle}>AKIRA CHIZU (起司)</h1>
-          <div className={styles.cardDivider}></div>
-          <p className={styles.cardSubtitle}>
-            MALAYSIAN ANIME AND CHIBI ARTIST
-          </p>
-        </div>
+          <div className={styles.cardButtonStack}>
+            {cardButtons.map((button) => (
+              <a
+                key={button.label}
+                href={button.href}
+                className={styles.cardButton}
+              >
+                <span className={styles.cardButtonIcon} aria-hidden="true">
+                  {button.icon}
+                </span>
+                <span className={styles.cardButtonLabel}>{button.label}</span>
+              </a>
+            ))}
+          </div>
 
-        <div className={styles.cardButtonStack}>
-          {cardButtons.map((button) => (
-            <a
-              key={button.label}
-              href={button.href}
-              className={styles.cardButton}
-            >
-              <span className={styles.cardButtonIcon} aria-hidden="true">
-                {button.icon}
-              </span>
-              <span className={styles.cardButtonLabel}>{button.label}</span>
-            </a>
-          ))}
-        </div>
-
-        <div className={styles.cardSocialRow} aria-label="Social shortcuts">
-          {socialIcons.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className={styles.cardSocialButton}
-              aria-label={item.label}
-            >
-              {item.icon}
-            </a>
-          ))}
-        </div>
-      </section>
-    </main>
+          <div className={styles.cardSocialRow} aria-label="Social shortcuts">
+            {socialIcons.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className={styles.cardSocialButton}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </a>
+            ))}
+          </div>
+        </section>
+      </div>
+    </section>
   );
 }

@@ -677,8 +677,8 @@
 }
 
 .cardHero {
-  width: 100%;
-  padding: 32px 28px 30px;
+  width: min(100%, 500px);
+  padding: 28px 24px 26px;
   border-radius: 32px;
   background: rgba(12, 13, 18, 0.82);
   border: none;
@@ -754,7 +754,7 @@
 }
 
 .cardButtonStack {
-  width: 100%;
+  width: min(100%, 500px);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -914,6 +914,12 @@
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
+}
+
+.cardPagePanel {
+  min-height: auto;
+  padding: 48px 20px 56px;
+  justify-content: center;
 }
 
 .welcomeHeadingStatic {
@@ -4008,7 +4014,8 @@ select.inputField {
     margin-bottom: 15px;
   }
 
-  .cardRoute {
+  .cardRoute,
+  .cardPagePanel {
     padding: 32px 16px 44px;
   }
 

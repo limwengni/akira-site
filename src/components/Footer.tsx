@@ -35,7 +35,7 @@ export const Footer = ({
     <footer className={styles.mangaFooter}>
       <div className={styles.footerBar}>
         <div className={styles.footerMetaTag}>
-          <span>Last Updated:</span> 23 May 2026
+          <span>Last Updated:</span> 30 May 2026
         </div>
         <div className={styles.copyrightTag} onClick={handleSecretClick}>
           {"Copyright \u00A9 "}
