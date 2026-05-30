@@ -9,7 +9,7 @@ import {
   GENDER_MAP,
   getRoleLabel,
 } from "@/src/constants/character";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function CharacterProfile() {
@@ -116,7 +116,7 @@ export default function CharacterProfile() {
                 onClick={() => router.push("/characters")}
                 aria-label="Return to character archive"
               >
-                <FontAwesomeIcon icon={faClose} />
+                <FontAwesomeIcon icon={faArrowLeft} />
               </button>
 
               <div className={styles.profilePage}>
@@ -190,6 +190,18 @@ export default function CharacterProfile() {
                   </div>
                 </div>
 
+                <div className={styles.profileNav}>
+                  {pages.map((page) => (
+                    <button
+                      key={page.num}
+                      className={`${styles.profileNavBtn} ${currentPage === page.num ? styles.active : ""}`}
+                      onClick={() => setCurrentPage(page.num)}
+                    >
+                      {page.label}
+                    </button>
+                  ))}
+                </div>
+
                 {currentPage === 1 && (
                   <div className={styles.profileSection}>
                     <h3>BIO</h3>
@@ -239,18 +251,6 @@ export default function CharacterProfile() {
                     )}
                   </div>
                 )}
-              </div>
-
-              <div className={styles.profileNav}>
-                {pages.map((page) => (
-                  <button
-                    key={page.num}
-                    className={`${styles.profileNavBtn} ${currentPage === page.num ? styles.active : ""}`}
-                    onClick={() => setCurrentPage(page.num)}
-                  >
-                    {page.label}
-                  </button>
-                ))}
               </div>
             </section>
           </div>

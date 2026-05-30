@@ -3,27 +3,6 @@
   position: relative;
   overflow: hidden;
   padding: 48px 20px 56px;
-  background:
-    radial-gradient(circle at top, rgba(137, 170, 255, 0.24), transparent 28%),
-    linear-gradient(180deg, #5f87ff 0%, #5171e0 38%, #445dc4 68%, #4f4db7 100%);
-}
-
-.commissionRoute::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(153, 160, 246, 0.26) 32%,
-    rgba(127, 135, 238, 0.36) 60%,
-    rgba(158, 156, 229, 0.48) 100%
-  );
-  -webkit-mask-image: radial-gradient(circle, #000 0.8px, transparent 1px);
-  -webkit-mask-size: 14px 14px;
-  mask-image: radial-gradient(circle, #000 0.8px, transparent 1px);
-  mask-size: 14px 14px;
 }
 
 .commissionShell {

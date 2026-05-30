@@ -22,7 +22,8 @@ export default function ClientLayout({
     pathname !== "/" &&
     !isCharacterProfile &&
     pathname !== "/characters" &&
-    pathname !== "/card";
+    !isCardRoute &&
+    !isCommissionRoute;
 
   const { isLoggedIn, login, logout } = useAuth();
 
