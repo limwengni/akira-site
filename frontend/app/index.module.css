@@ -1833,6 +1833,12 @@ input.searchInput {
   transform: translateY(-1px);
 }
 
+.formNavToggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .authModalContent {
   max-width: 460px;
   padding: 0;
@@ -2812,6 +2818,11 @@ select.inputField {
   border-color: var(--error-color);
   color: #ffffff;
   transform: translateY(-1px);
+}
+.closeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 .close2Btn {
   background: var(--error-color);

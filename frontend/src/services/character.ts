@@ -1,149 +1,150 @@
 import { supabase } from "../lib/superbase";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+const getAuthHeaders = async () => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error("Please log in to continue.");
+  }
+
+  return {
+    Authorization: `Bearer ${session.access_token}`,
+  };
+};
+
 export const characterService = {
   async fetchAllCharacters() {
-    return await supabase
-      .from("characters")
-      .select("*, stats(*)") // Joins the stats table
-      .order("name", { ascending: true });
+    const response = await fetch(`${API_BASE_URL}/characters`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch characters");
+    }
+
+    const data = await response.json();
+    return { data, error: null };
   },
 
   uploadImage: async (file: File, slug: string, type: string) => {
-    const isGallery = type.startsWith("gallery");
-    const folder = slug; // e.g., "hikaru"
+    const authHeaders = await getAuthHeaders();
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("slug", slug);
+    formData.append("asset_type", type);
 
-    // A. CLEANUP (Only for Main/Icon)
-    // We don't want to delete gallery files whenever we upload a new one!
-    if (!isGallery) {
-      const { data: existingFiles } = await supabase.storage
-        .from("character-assets")
-        .list(folder);
+    const response = await fetch(`${API_BASE_URL}/storage/upload`, {
+      method: "POST",
+      headers: authHeaders,
+      body: formData,
+    });
 
-      if (existingFiles && existingFiles.length > 0) {
-        const filesToDelete = existingFiles
-          .filter((f) => f.name.startsWith(`${type}-`))
-          .map((f) => `${folder}/${f.name}`);
+    const result = await response.json();
 
-        if (filesToDelete.length > 0) {
-          await supabase.storage.from("character-assets").remove(filesToDelete);
-        }
-      }
+    if (!response.ok) {
+      throw new Error(result.detail || "Failed to upload image");
     }
 
-    // B. UPLOAD LOGIC
-    const fileExt = file.name.split(".").pop();
-    let filePath = "";
-
-    if (isGallery) {
-      // If it's a gallery file, we keep the original name but add a timestamp to avoid cache issues
-      // Path: hikaru/gallery/123456789-my-art.png
-      const cleanFileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension from original name
-      filePath = `${folder}/gallery/${Date.now()}-${cleanFileName}.${fileExt}`;
-    } else {
-      // Standard Main/Icon logic
-      // Path: hikaru/main-123456789.png
-      filePath = `${folder}/${type}-${Date.now()}.${fileExt}`;
-    }
-
-    const { error } = await supabase.storage
-      .from("character-assets")
-      .upload(filePath, file);
-
-    if (error) throw error;
-
-    const { data } = supabase.storage
-      .from("character-assets")
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
+    return result.publicUrl;
   },
 
   // Used to remove the images if user cleared them without uploading a new one
   async deleteImage(url: string) {
     if (!url || url.includes("placeholder")) return;
 
-    try {
-      const path = url.split("public/character-assets/")[1];
+    const authHeaders = await getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/storage/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders,
+      },
+      body: JSON.stringify({ url }),
+    });
 
-      if (path) {
-        const { data, error } = await supabase.storage
-          .from("character-assets")
-          .remove([path]);
+    const result = await response.json();
 
-        if (error) throw error;
-        return data;
-      }
-    } catch (error) {
-      console.error("Error in deleteAsset:", error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(result.detail || "Failed to delete image");
     }
+
+    return result.deleted;
   },
 
   async save(charPayload: any, statsPayload: any, id?: number) {
+    const authHeaders = await getAuthHeaders();
+
     if (!id) {
       // NEW CHARACTER
-      const { data: newChar, error: charErr } = await supabase
-        .from("characters")
-        .insert([charPayload])
-        .select()
-        .single();
+      const response = await fetch(`${API_BASE_URL}/characters`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: JSON.stringify({
+          charPayload,
+          statsPayload,
+        }),
+      });
 
-      if (charErr) throw charErr;
+      const result = await response.json();
 
-      const { error: statsErr } = await supabase
-        .from("stats")
-        .insert([{ character_id: newChar.id, ...statsPayload }]);
+      if (!response.ok) {
+        throw new Error(result.detail || "Failed to create character");
+      }
 
-      if (statsErr) throw statsErr;
+      return { success: true, message: result.message ?? null, error: null };
     } else {
-      // UPDATE CHARACTER
-      const updates = [];
+      const response = await fetch(`${API_BASE_URL}/characters/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: JSON.stringify({
+          charPayload,
+          statsPayload,
+        }),
+      });
 
-      if (Object.keys(charPayload).length > 0) {
-        updates.push(
-          supabase.from("characters").update(charPayload).eq("id", id),
-        );
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.detail || "Failed to update character");
       }
 
-      if (Object.keys(statsPayload).length > 0) {
-        updates.push(
-          supabase.from("stats").update(statsPayload).eq("character_id", id),
-        );
-      }
-
-      if (updates.length > 0) {
-        const results = await Promise.all(updates);
-        // Check for errors in any of the results
-        for (const res of results) {
-          if (res.error) throw res.error;
-        }
-      }
+      return { success: true, message: result.message ?? null, error: null };
     }
   },
 
   async delete(id: number, slug: string) {
-    // 1. CLEANUP STORAGE
-    const foldersToClean = [slug, `${slug}/gallery`];
+    const authHeaders = await getAuthHeaders();
+    const response = await fetch(
+      `${API_BASE_URL}/characters/${id}?slug=${encodeURIComponent(slug)}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+      },
+    );
 
-    for (const folderPath of foldersToClean) {
-      const { data: list } = await supabase.storage
-        .from("character-assets")
-        .list(folderPath);
+    const result = await response.json();
 
-      if (list && list.length > 0) {
-        const filesToRemove = list
-          .filter((x) => x.name !== ".emptyKeep")
-          .map((x) => `${folderPath}/${x.name}`);
-
-        if (filesToRemove.length > 0) {
-          await supabase.storage.from("character-assets").remove(filesToRemove);
-        }
-      }
+    if (!response.ok) {
+      throw new Error(result.detail || "Failed to delete character");
     }
 
-    // 2. DELETE FROM DATABASE
-    const { error } = await supabase.from("characters").delete().eq("id", id);
-
-    if (error) throw error;
+    return { success: true, message: result.message ?? null, error: null };
   },
 };

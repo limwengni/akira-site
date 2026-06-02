@@ -67,6 +67,7 @@ export default function Characters() {
     name: string;
   } | null>(null);
   const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
 
@@ -108,11 +109,16 @@ export default function Characters() {
   const confirmDelete = async () => {
     if (!charPendingDelete) return;
 
+    setIsDeleting(true);
     const result = await handleDelete(charPendingDelete.id, charPendingDelete.slug);
+    setIsDeleting(false);
 
     if (result?.success) {
       setCharPendingDelete(null);
       setDeleteError("");
+      if (result.message) {
+        alert(result.message);
+      }
       return;
     }
 
@@ -139,6 +145,17 @@ export default function Characters() {
   });
 
   const totalPages = Math.ceil(filteredCharacters.length / itemsPerPage);
+
+  useEffect(() => {
+    if (totalPages === 0) {
+      setCurrentPage(1);
+      return;
+    }
+
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const paginatedCharacters = filteredCharacters.slice(
     (currentPage - 1) * itemsPerPage,
@@ -522,15 +539,16 @@ export default function Characters() {
       {charPendingDelete && (
         <div className={styles.modalOverlay}>
           <div className={`${styles.modalContent} ${styles.authModalContent}`}>
-            <button
-              type="button"
-              className={styles.authModalClose}
-              onClick={() => {
-                setCharPendingDelete(null);
-                setDeleteError("");
-              }}
-              aria-label="Close delete dialog"
-            >
+              <button
+                type="button"
+                className={styles.authModalClose}
+                onClick={() => {
+                  setCharPendingDelete(null);
+                  setDeleteError("");
+                }}
+                disabled={isDeleting}
+                aria-label="Close delete dialog"
+              >
               x
             </button>
             <header className={styles.modalHeader}>
@@ -551,8 +569,9 @@ export default function Characters() {
                   type="button"
                   className={`${styles.saveBtn} ${styles.authPrimaryBtn} ${styles.dangerActionBtn}`}
                   onClick={confirmDelete}
+                  disabled={isDeleting}
                 >
-                  Delete
+                  {isDeleting ? "Deleting..." : "Delete"}
                 </button>
                 <button
                   type="button"
@@ -561,6 +580,7 @@ export default function Characters() {
                     setCharPendingDelete(null);
                     setDeleteError("");
                   }}
+                  disabled={isDeleting}
                 >
                   Cancel
                 </button>

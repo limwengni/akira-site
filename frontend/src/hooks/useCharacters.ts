@@ -186,7 +186,7 @@ export const useCharacters = () => {
       );
 
       // Save to Database
-      await characterService.save(
+      const saveResult = await characterService.save(
         charPayload,
         statsPayload,
         isNew ? null : tempEditingId,
@@ -197,6 +197,8 @@ export const useCharacters = () => {
         alert(
           `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
         );
+      } else  if (saveResult?.success && saveResult.message) {
+        alert(saveResult.message);
       }
 
       mutate();
@@ -211,17 +213,13 @@ export const useCharacters = () => {
   };
 
   const handleDelete = async (id: number, slug: string) => {
-    const originalList = [...charList];
-    mutate(charList.filter((c: any) => c.id !== id), false);
-
     try {
-      await characterService.delete(id, slug);
+      const result = await characterService.delete(id, slug);
+      mutate(charList.filter((c: any) => c.id !== id), false);
       mutate();
-      return { success: true, error: null };
+      return { success: true, message: result?.message ?? null, error: null };
     } catch (err: any) {
       console.error("Deletion failed:", err);
-      // Revert the UI if the database failed to delete
-      mutate(originalList, false);
       return {
         success: false,
         error: err.message || "Deletion failed. Please try again.",

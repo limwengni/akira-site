@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
+from .routers.characters import router as characters_router
+from .routers.storage import router as storage_router
 
 settings = get_settings()
 
@@ -19,6 +21,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(characters_router)
+app.include_router(storage_router)
+
 
 @app.get("/")
 def read_root() -> dict[str, str]:
@@ -28,11 +33,3 @@ def read_root() -> dict[str, str]:
 @app.get("/health")
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
-
-
-# Add your routers here as you migrate writes out of the frontend.
-# Example targets:
-# - POST /characters
-# - PUT /characters/{character_id}
-# - DELETE /characters/{character_id}
-# - POST /votes

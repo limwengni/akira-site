@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     cors_origins: str = "http://localhost:3000"
+    admin_email: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

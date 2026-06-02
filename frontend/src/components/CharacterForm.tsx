@@ -268,6 +268,7 @@ export const CharacterForm = ({
             <button
               type="button"
               className={styles.formNavToggle}
+              disabled={isSaving}
               onClick={() => setShowStageNav((open) => !open)}
               aria-expanded={showStageNav}
               aria-label={
@@ -285,6 +286,7 @@ export const CharacterForm = ({
             <div className={styles.navButtons}>
               <button
                 type="button"
+                disabled={isSaving}
                 onClick={() => setFormStep(1)}
                 className={`${styles.navBtn} ${formStep === 1 ? styles.activeNav : ""}`}
               >
@@ -292,6 +294,7 @@ export const CharacterForm = ({
               </button>
               <button
                 type="button"
+                disabled={isSaving}
                 onClick={() => setFormStep(2)}
                 className={`${styles.navBtn} ${formStep === 2 ? styles.activeNav : ""}`}
               >
@@ -299,6 +302,7 @@ export const CharacterForm = ({
               </button>
               <button
                 type="button"
+                disabled={isSaving}
                 onClick={() => setFormStep(3)}
                 className={`${styles.navBtn} ${formStep === 3 ? styles.activeNav : ""}`}
               >
@@ -963,12 +967,14 @@ export const CharacterForm = ({
                   type="button"
                   onClick={onClose}
                   className={styles.closeBtn}
+                  disabled={isSaving}
                 >
                   ABORT
                 </button>
                 <button
                   type="button"
                   className={styles.saveBtn}
+                  disabled={isSaving}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation(); // Stop event bubbling
@@ -986,12 +992,14 @@ export const CharacterForm = ({
                   type="button"
                   onClick={onClose}
                   className={styles.closeBtn}
+                  disabled={isSaving}
                 >
                   ABORT
                 </button>
                 <button
                   type="button"
                   className={styles.saveBtn}
+                  disabled={isSaving}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation(); // Stop event bubbling
@@ -1009,6 +1017,7 @@ export const CharacterForm = ({
                   type="button"
                   onClick={onClose}
                   className={styles.closeBtn}
+                  disabled={isSaving}
                 >
                   ABORT
                 </button>
