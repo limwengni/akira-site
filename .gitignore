@@ -2,6 +2,11 @@
 
 # dependencies
 /node_modules
+/frontend/node_modules
+/.venv
+/backend/.venv
+/backend/__pycache__
+/backend/app/__pycache__
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,7 +20,9 @@
 
 # next.js
 /.next/
+/frontend/.next/
 /out/
+/frontend/out/
 
 # production
 /build
@@ -39,6 +46,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+frontend/next-env.d.ts
 
 .vercel
 .env*.local
