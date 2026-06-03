@@ -6,7 +6,9 @@ import "./globals.css";
 import { usePathname } from "next/navigation";
 import { Header } from "@/src/components/Header";
 import { Footer } from "@/src/components/Footer";
+import { StatusMessage } from "@/src/components/StatusMessage";
 import { useAuth } from "@/src/hooks/useAuth";
+import { useStatusMessage } from "@/src/hooks/useStatusMessage";
 
 export default function ClientLayout({
   children,
@@ -26,6 +28,7 @@ export default function ClientLayout({
     !isCommissionRoute;
 
   const { isLoggedIn, login, logout } = useAuth();
+  const { status, showStatus, clearStatus } = useStatusMessage();
 
   const [showLogin, setShowLogin] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -36,9 +39,6 @@ export default function ClientLayout({
   const menuItems = [
     { id: "01", label: "Introduction", href: "/" },
     { id: "02", label: "Characters", href: "/characters" },
-    // { id: "03", label: "World Lore", href: "/world-lore" },
-    // { id: "04", label: "About the Artist", href: "/about" },
-    // { id: "05", label: "Archive", href: "/archive" },
   ];
 
   const onLoginSubmit = async (e: React.FormEvent) => {
@@ -47,12 +47,16 @@ export default function ClientLayout({
       setLoginError("Please enter both your email and password.");
       return;
     }
+
     setLoginError("");
+    clearStatus();
+
     const result = await login(email, password);
     if (result.success) {
       setShowLogin(false);
       return;
     }
+
     setLoginError(
       result.error === "Invalid login credentials"
         ? "That email or password doesn't match our admin account."
@@ -61,8 +65,17 @@ export default function ClientLayout({
   };
 
   const onLogoutSubmit = async () => {
-    await logout();
-    setShowLogout(false);
+    clearStatus();
+    const result = await logout();
+    if (result.success) {
+      setShowLogout(false);
+      return;
+    }
+
+    showStatus(
+      result.error || "We couldn't log you out right now. Please try again.",
+      "error",
+    );
   };
 
   if (isCharacterProfile || isCardRoute || isCommissionRoute) {
@@ -95,22 +108,26 @@ export default function ClientLayout({
                 </aside>
               )}
 
-              {/* PAGE-SPECIFIC CONTENT */}
               {children}
             </main>
 
             {!isCharacterProfile && (
               <Footer
                 isLoggedIn={isLoggedIn}
-                onOpenLogout={() => setShowLogout(true)}
-                onOpenLogin={() => setShowLogin(true)}
+                onOpenLogout={() => {
+                  clearStatus();
+                  setShowLogout(true);
+                }}
+                onOpenLogin={() => {
+                  clearStatus();
+                  setShowLogin(true);
+                }}
               />
             )}
           </div>
         </div>
       </div>
 
-      {/* Login Modal */}
       {showLogin && (
         <div className={styles.modalOverlay}>
           <div className={`${styles.modalContent} ${styles.authModalContent}`}>
@@ -120,20 +137,27 @@ export default function ClientLayout({
               onClick={() => {
                 setShowLogin(false);
                 setLoginError("");
+                clearStatus();
               }}
               aria-label="Close login dialog"
             >
-              ×
+              x
             </button>
             <header className={styles.modalHeader}>
               <h3 className={styles.authModalTitle}>ADMIN LOGIN</h3>
             </header>
             <form onSubmit={onLoginSubmit} className={styles.authModalBody}>
+              {status && (
+                <StatusMessage
+                  message={status.message}
+                  tone={status.tone}
+                  onDismiss={clearStatus}
+                />
+              )}
               <div className={styles.authInputShell}>
                 <span className={styles.authInputLabel}>Admin Email</span>
                 <input
                   type="email"
-                  placeholder=""
                   className={`${styles.inputField} ${styles.authModalInput}`}
                   value={email}
                   onChange={(e) => {
@@ -147,7 +171,6 @@ export default function ClientLayout({
                 <span className={styles.authInputLabel}>Password</span>
                 <input
                   type="password"
-                  placeholder=""
                   className={`${styles.inputField} ${styles.authModalInput}`}
                   value={password}
                   onChange={(e) => {
@@ -163,7 +186,10 @@ export default function ClientLayout({
                 </p>
               )}
               <div className={`${styles.modalActions} ${styles.authModalActions}`}>
-                <button type="submit" className={`${styles.saveBtn} ${styles.authPrimaryBtn}`}>
+                <button
+                  type="submit"
+                  className={`${styles.saveBtn} ${styles.authPrimaryBtn}`}
+                >
                   Log In
                 </button>
               </div>
@@ -172,32 +198,49 @@ export default function ClientLayout({
         </div>
       )}
 
-      {/* Logout Modal */}
       {showLogout && (
         <div className={styles.modalOverlay}>
           <div className={`${styles.modalContent} ${styles.authModalContent}`}>
             <button
               type="button"
               className={styles.authModalClose}
-              onClick={() => setShowLogout(false)}
+              onClick={() => {
+                setShowLogout(false);
+                clearStatus();
+              }}
               aria-label="Close logout dialog"
             >
-              ×
+              x
             </button>
             <header className={styles.modalHeader}>
               <h3 className={styles.authModalTitle}>CONFIRM LOGOUT</h3>
             </header>
             <div className={styles.authModalBody}>
+              {status && (
+                <StatusMessage
+                  message={status.message}
+                  tone={status.tone}
+                  onDismiss={clearStatus}
+                />
+              )}
               <p className={styles.authModalText}>
                 Are you sure you want to log out of admin mode?
               </p>
               <div className={`${styles.modalActions} ${styles.authModalActions}`}>
-                <button className={`${styles.saveBtn} ${styles.authPrimaryBtn}`} onClick={onLogoutSubmit}>
+                <button
+                  type="button"
+                  className={`${styles.saveBtn} ${styles.authPrimaryBtn}`}
+                  onClick={onLogoutSubmit}
+                >
                   Confirm
                 </button>
                 <button
+                  type="button"
                   className={`${styles.closeBtn} ${styles.authSecondaryBtn}`}
-                  onClick={() => setShowLogout(false)}
+                  onClick={() => {
+                    setShowLogout(false);
+                    clearStatus();
+                  }}
                 >
                   Cancel
                 </button>

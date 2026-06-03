@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import { authService } from "@/src/services/auth";
 
+interface AuthActionResult {
+  success: boolean;
+  error: string | null;
+}
+
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -18,7 +23,10 @@ export const useAuth = () => {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<AuthActionResult> => {
     const { error } = await authService.login(email, password);
     if (error) {
       return { success: false, error: error.message };
@@ -31,14 +39,15 @@ export const useAuth = () => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<AuthActionResult> => {
     const { error } = await authService.logout();
     if (error) {
-      alert("Logout failed: " + error.message);
-    } else {
-      setIsLoggedIn(false);
-      window.location.reload();
+      return { success: false, error: error.message };
     }
+
+    setIsLoggedIn(false);
+    window.location.reload();
+    return { success: true, error: null };
   };
 
   useEffect(() => {

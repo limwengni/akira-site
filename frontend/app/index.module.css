@@ -996,6 +996,66 @@
   white-space: nowrap;
 }
 
+.statusMessage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 30px rgba(16, 12, 45, 0.22);
+  backdrop-filter: blur(10px);
+  color: #f5f7ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.statusFloating {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 120;
+  width: min(420px, calc(100vw - 32px));
+}
+
+.statusSuccess {
+  background: rgba(25, 60, 48, 0.94);
+  border-color: rgba(111, 242, 200, 0.32);
+}
+
+.statusError {
+  background: rgba(88, 24, 34, 0.94);
+  border-color: rgba(255, 118, 145, 0.34);
+}
+
+.statusWarning {
+  background: rgba(98, 62, 18, 0.94);
+  border-color: rgba(255, 203, 102, 0.34);
+}
+
+.statusInfo {
+  background: rgba(18, 42, 92, 0.94);
+  border-color: rgba(144, 184, 255, 0.34);
+}
+
+.statusDismiss {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.86rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.76;
+}
+
+.statusDismiss:hover {
+  opacity: 1;
+}
+
 .searchIcon {
   position: absolute;
   left: 14px; /* Distance from the left edge */

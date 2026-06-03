@@ -1,5 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DeleteImageRequest(BaseModel):
-    url: str
+    model_config = ConfigDict(extra="forbid")
+
+    url: str = Field(min_length=1)

@@ -3,19 +3,43 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { characterService } from "@/src/services/character";
+import type {
+  Character,
+  CharacterFormExtraData,
+  CharacterMutationResult,
+  CharacterPayload,
+  CharacterStatsPayload,
+} from "@/src/types/character";
 
-const characterFetcher = async () => {
+const characterFetcher = async (): Promise<Character[]> => {
   const { data, error } = await characterService.fetchAllCharacters();
   if (error) throw error;
   return data || [];
 };
 
+const getFormValue = (formData: FormData, key: string): string =>
+  String(formData.get(key) ?? "").trim();
+
+const parseOptionalInteger = (value: string): number | undefined => {
+  if (!value) return undefined;
+  const parsedValue = Number.parseInt(value, 10);
+  return Number.isNaN(parsedValue) ? undefined : parsedValue;
+};
+
+interface SaveCharacterParams {
+  formElement: HTMLFormElement;
+  editingChar: Character | null;
+  mainFile: File | null;
+  iconFile: File | null;
+  extraData: CharacterFormExtraData;
+}
+
 export const useCharacters = () => {
   const {
-    data: charList = [], // Defaults to an empty array so map() doesn't break
+    data: charList = [],
     isLoading: loading,
-    mutate, // The magic cache updater function
-  } = useSWR("characters-cache", characterFetcher);
+    mutate,
+  } = useSWR<Character[]>("characters-cache", characterFetcher);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -23,206 +47,187 @@ export const useCharacters = () => {
     await mutate();
   };
 
-  const handleSave = async (
-    e: React.FormEvent<HTMLFormElement>,
-    editingChar: any,
-    mainFile: File | null,
-    iconFile: File | null,
-    onSuccess: () => void,
-    extraData?: {
-      abilities: string;
-      relationships: string;
-      trivias: string;
-      labels: string[];
-      galleryFiles: File[];
-    },
-  ) => {
-    e.preventDefault();
-    if (isSaving) return; // Prevent multiple saves
+  const handleSave = async ({
+    formElement,
+    editingChar,
+    mainFile,
+    iconFile,
+    extraData,
+  }: SaveCharacterParams): Promise<CharacterMutationResult> => {
+    if (isSaving) {
+      return {
+        success: false,
+        message: null,
+        error: "A save is already in progress.",
+      };
+    }
 
     setIsSaving(true);
 
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
+    const formData = new FormData(formElement);
     const isNew = !editingChar?.id;
-
-    let currentSlug = editingChar?.slug || "";
-
-    if (isNew) {
-      // New: Generate "ashita" from "Ashita Kazumi"
-      currentSlug = (data.name as string).trim().split(" ")[0].toLowerCase();
-    }
+    const name = getFormValue(formData, "name");
+    const role = Number.parseInt(getFormValue(formData, "role"), 10);
+    const quote = getFormValue(formData, "quote");
+    const bio = getFormValue(formData, "bio");
+    const slug =
+      editingChar?.slug || name.split(" ")[0]?.toLowerCase() || "";
 
     const tempMainUrl = mainFile
       ? URL.createObjectURL(mainFile)
-      : editingChar?.image_url;
+      : editingChar?.image_url || "";
 
     const tempIconUrl = iconFile
       ? URL.createObjectURL(iconFile)
-      : editingChar?.icon_url;
+      : editingChar?.icon_url || "";
 
-    const optimisticChar = {
-      id: editingChar?.id || Date.now(), // Temporary ID for new items
-      ...editingChar, // Keep existing data (like ID)
-      name: data.name,
-      role: parseInt(data.role as string),
-      quote: data.quote,
-      bio: data.bio,
-      abilities: extraData?.abilities,
-      relationships: extraData?.relationships,
-      trivias: extraData?.trivias,
-      labels: extraData?.labels,
+    const optimisticChar: Character = {
+      ...editingChar,
+      id: editingChar?.id || Date.now(),
+      name,
+      role,
+      quote,
+      bio,
+      abilities: extraData.abilities,
+      relationships: extraData.relationships,
+      trivias: extraData.trivias,
+      labels: extraData.labels,
       image_url: tempMainUrl,
       icon_url: tempIconUrl,
-      slug: currentSlug,
+      slug,
     };
 
-    let updatedList;
-    if (isNew) {
-      updatedList = [optimisticChar, ...charList];
-    } else {
-      updatedList = charList.map((c: any) =>
-        c.id === editingChar!.id ? optimisticChar : c,
-      );
-    }
+    const updatedList = isNew
+      ? [optimisticChar, ...charList]
+      : charList.map((character) =>
+          character.id === editingChar?.id ? optimisticChar : character,
+        );
+
     mutate(updatedList, false);
 
-    const tempEditingId = editingChar?.id; // Remember this for the DB call
-
     try {
-      // 1. Upload Images if they exist
       let finalImageUrl = editingChar?.image_url || "";
       let finalIconUrl = editingChar?.icon_url || "";
-      let uploadErrors: string[] = [];
+      const uploadErrors: string[] = [];
 
       if (mainFile) {
         try {
-          finalImageUrl = await characterService.uploadImage(
-            mainFile,
-            currentSlug,
-            "main",
-          );
-        } catch (err) {
-          console.error("Main image upload failed", err);
-          uploadErrors.push("Main Image");
+          finalImageUrl = await characterService.uploadImage(mainFile, slug, "main");
+        } catch (error) {
+          console.error("Main image upload failed", error);
+          uploadErrors.push("main image");
         }
       }
+
       if (iconFile) {
         try {
-          finalIconUrl = await characterService.uploadImage(
-            iconFile,
-            currentSlug,
-            "icon",
-          );
-        } catch (err) {
-          console.error("Icon upload failed", err);
-          uploadErrors.push("Icon");
+          finalIconUrl = await characterService.uploadImage(iconFile, slug, "icon");
+        } catch (error) {
+          console.error("Icon upload failed", error);
+          uploadErrors.push("icon");
         }
       }
 
       let galleryUrls = editingChar?.gallery || [];
-      if (extraData?.galleryFiles && extraData.galleryFiles.length > 0) {
-        // Loop and upload each gallery file to the /gallery/ folder
+      if (extraData.galleryFiles.length > 0) {
         const uploadPromises = extraData.galleryFiles.map((file) =>
-          characterService.uploadImage(file, currentSlug, "gallery"),
+          characterService.uploadImage(file, slug, "gallery"),
         );
         const newGalleryUrls = await Promise.all(uploadPromises);
         galleryUrls = [...galleryUrls, ...newGalleryUrls];
       }
 
-      // --- Existing character but their images were cleared ---
-      if (!isNew) {
-        // Find the original data from your list to see what the URL WAS before editing
-        const originalChar = charList.find((c) => c.id === editingChar.id);
+      if (!isNew && editingChar) {
+        const originalChar = charList.find((character) => character.id === editingChar.id);
 
-        // Scenario: Delete old Main Image if it was REPLACED or REMOVED
         if (originalChar?.image_url && (mainFile || !editingChar.image_url)) {
-          // We use 'await' but don't let it block the save if it fails
-          characterService
-            .deleteImage(originalChar.image_url)
-            .catch(console.error);
+          characterService.deleteImage(originalChar.image_url).catch(console.error);
         }
 
-        // Scenario: Delete old Icon if it was REPLACED or REMOVED
         if (originalChar?.icon_url && (iconFile || !editingChar.icon_url)) {
-          characterService
-            .deleteImage(originalChar.icon_url)
-            .catch(console.error);
+          characterService.deleteImage(originalChar.icon_url).catch(console.error);
         }
       }
-      // -------------------------------
 
-      const charPayload = {
-        name: data.name,
+      const charPayload: CharacterPayload = {
+        name,
         image_url: finalImageUrl,
         icon_url: finalIconUrl,
-        quote: data.quote,
-        role: parseInt(data.role as string),
-        slug: currentSlug,
-        bio: data.bio,
-        abilities: extraData?.abilities,
-        relationships: extraData?.relationships,
-        trivias: extraData?.trivias,
-        labels: extraData?.labels,
+        quote,
+        role,
+        slug,
+        bio,
+        abilities: extraData.abilities,
+        relationships: extraData.relationships,
+        trivias: extraData.trivias,
+        labels: extraData.labels,
         gallery: galleryUrls,
       };
 
-      // Format birthday to YYYY-MM-DD if possible (using dummy year 2000)
-      const birthday = `2000-${data.birth_month}-${data.birth_day}`;
+      const birthday = `2000-${getFormValue(formData, "birth_month")}-${getFormValue(formData, "birth_day")}`;
+      const status = parseOptionalInteger(getFormValue(formData, "status"));
 
-      const rawStats = {
-        age: data.age,
-        gender: data.gender,
-        height: data.height ? parseInt(data.height as string) : null, // Store as number only
-        species: data.species,
-        birthday: birthday,
-        // dimension: parseInt(data.dimension as string) || null,
-        // affiliation: parseInt(data.affiliation as string) || null,
-        status: parseInt(data.status as string) || 1,
+      const statsPayload: CharacterStatsPayload = {
+        age: getFormValue(formData, "age") || undefined,
+        gender: parseOptionalInteger(getFormValue(formData, "gender")),
+        height: parseOptionalInteger(getFormValue(formData, "height")),
+        species: getFormValue(formData, "species") || undefined,
+        birthday,
+        status: status ?? 1,
       };
 
-      const statsPayload = Object.fromEntries(
-        Object.entries(rawStats).filter(([_, v]) => v != null && v !== ""),
-      );
-
-      // Save to Database
       const saveResult = await characterService.save(
         charPayload,
         statsPayload,
-        isNew ? null : tempEditingId,
+        isNew ? null : editingChar?.id,
       );
 
-      // FINAL USER FEEDBACK
+      await mutate();
+
       if (uploadErrors.length > 0) {
-        alert(
-          `Character saved, BUT these images failed to upload: ${uploadErrors.join(", ")}. Please try uploading them again.`,
-        );
-      } else  if (saveResult?.success && saveResult.message) {
-        alert(saveResult.message);
+        return {
+          success: true,
+          message: `Character saved, but ${uploadErrors.join(" and ")} upload failed. Please retry those files.`,
+          error: null,
+        };
       }
 
-      mutate();
-    } catch (err: any) {
-      console.error("Sync failed", err);
-      alert("Save failed: " + err.message);
-      mutate(charList, false); // ← revert back instead of reloading
+      return saveResult;
+    } catch (error) {
+      console.error("Sync failed", error);
+      mutate(charList, false);
+
+      return {
+        success: false,
+        message: null,
+        error:
+          error instanceof Error
+            ? `Save failed: ${error.message}`
+            : "Save failed. Please try again.",
+      };
     } finally {
       setIsSaving(false);
-      onSuccess();
     }
   };
 
-  const handleDelete = async (id: number, slug: string) => {
+  const handleDelete = async (
+    id: number,
+    slug: string,
+  ): Promise<CharacterMutationResult> => {
     try {
       const result = await characterService.delete(id, slug);
-      mutate(charList.filter((c: any) => c.id !== id), false);
-      mutate();
-      return { success: true, message: result?.message ?? null, error: null };
-    } catch (err: any) {
-      console.error("Deletion failed:", err);
+      mutate(charList.filter((character) => character.id !== id), false);
+      await mutate();
+      return { success: true, message: result.message ?? null, error: null };
+    } catch (error) {
+      console.error("Deletion failed:", error);
       return {
         success: false,
-        error: err.message || "Deletion failed. Please try again.",
+        message: null,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Deletion failed. Please try again.",
       };
     }
   };

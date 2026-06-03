@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import styles from "../index.module.css";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCharacters } from "@/src/hooks/useCharacters";
+import type { Character } from "@/src/types/character";
 
 export default function VotingPage() {
   const { checkAuthStatus } = useAuth();
   const { charList, fetchCharacters } = useCharacters();
-  const [votes, setVotes] = useState<{ [key: string]: number }>({});
+  const [votes, setVotes] = useState<Record<string, number>>({});
   const [isVoting, setIsVoting] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function VotingPage() {
   }, []);
 
   useEffect(() => {
-    const mockVotes: any = {};
+    const mockVotes: Record<string, number> = {};
     charList.forEach((char) => {
       mockVotes[char.slug] = Math.floor(Math.random() * 8000000) + 1000000;
     });
@@ -34,8 +35,11 @@ export default function VotingPage() {
   };
 
   const sortedChars = [...charList].sort(
-    (a, b) => (votes[b.slug] || 0) - (votes[a.slug] || 0)
+    (a, b) => (votes[b.slug] || 0) - (votes[a.slug] || 0),
   );
+
+  const getVotingImageUrl = (character: Character) =>
+    character.icon_url || character.image_url || "/placeholder-icon.png";
 
   return (
     <>
@@ -193,7 +197,7 @@ export default function VotingPage() {
                       <div className="portrait-wing">
                         <div className="portrait-bg" />
                         <div className="char-pop-out">
-                          <img src={char.icon_url} className="char-img" alt={char.name} />
+                          <img src={getVotingImageUrl(char)} className="char-img" alt={char.name} />
                         </div>
                       </div>
                       <div className="data-wing-gold">
@@ -210,7 +214,7 @@ export default function VotingPage() {
                   ) : (
                     <div className="normal-box">
                       <div className="normal-char-box">
-                        <img src={char.icon_url} style={{ width: '100%', height: 'auto' }} alt={char.name} />
+                        <img src={getVotingImageUrl(char)} style={{ width: "100%", height: "auto" }} alt={char.name} />
                       </div>
                       <div className="rank-num" style={{ fontSize: '2.5rem' }}>{rank}</div>
                       <div className="char-info">

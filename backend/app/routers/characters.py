@@ -28,10 +28,11 @@ def create_character(
     payload: CharacterWriteRequest,
     _user=Depends(require_authenticated_user),
 ):
+    char_payload = payload.charPayload.model_dump()
     char_response = (
         supabase
         .from_("characters")
-        .insert([payload.charPayload])
+        .insert([char_payload])
         .execute()
     )
 
@@ -43,7 +44,7 @@ def create_character(
 
     stats_data = {
         "character_id": character_id,
-        **payload.statsPayload,
+        **payload.statsPayload.model_dump(exclude_none=True),
     }
 
     stats_response = (
@@ -73,10 +74,11 @@ def update_character(
     stats_response = None
 
     if payload.charPayload:
+        char_payload = payload.charPayload.model_dump()
         char_response = (
             supabase
             .from_("characters")
-            .update(payload.charPayload)
+            .update(char_payload)
             .eq("id", character_id)
             .execute()
         )
@@ -85,10 +87,11 @@ def update_character(
             raise HTTPException(status_code=500, detail="Failed to update character")
 
     if payload.statsPayload:
+        stats_payload = payload.statsPayload.model_dump(exclude_none=True)
         stats_response = (
             supabase
             .from_("stats")
-            .update(payload.statsPayload)
+            .update(stats_payload)
             .eq("character_id", character_id)
             .execute()
         )

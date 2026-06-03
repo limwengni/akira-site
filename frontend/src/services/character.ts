@@ -1,4 +1,13 @@
 import { supabase } from "../lib/superbase";
+import type {
+  Character,
+  CharacterAssetType,
+  CharacterMutationResult,
+  CharacterPayload,
+  CharacterStatsPayload,
+  CharacterWriteRequest,
+  ImageUploadResponse,
+} from "@/src/types/character";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -30,11 +39,15 @@ export const characterService = {
       throw new Error("Failed to fetch characters");
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as Character[];
     return { data, error: null };
   },
 
-  uploadImage: async (file: File, slug: string, type: string) => {
+  async uploadImage(
+    file: File,
+    slug: string,
+    type: CharacterAssetType,
+  ): Promise<string> {
     const authHeaders = await getAuthHeaders();
     const formData = new FormData();
     formData.append("file", file);
@@ -47,18 +60,23 @@ export const characterService = {
       body: formData,
     });
 
-    const result = await response.json();
+    const result = (await response.json()) as
+      | ({ detail?: string } & Partial<ImageUploadResponse>)
+      | undefined;
 
     if (!response.ok) {
-      throw new Error(result.detail || "Failed to upload image");
+      throw new Error(result?.detail || "Failed to upload image");
+    }
+
+    if (!result?.publicUrl) {
+      throw new Error("Upload succeeded, but no image URL was returned.");
     }
 
     return result.publicUrl;
   },
 
-  // Used to remove the images if user cleared them without uploading a new one
-  async deleteImage(url: string) {
-    if (!url || url.includes("placeholder")) return;
+  async deleteImage(url: string): Promise<string[]> {
+    if (!url || url.includes("placeholder")) return [];
 
     const authHeaders = await getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/storage/delete`, {
@@ -70,63 +88,56 @@ export const characterService = {
       body: JSON.stringify({ url }),
     });
 
-    const result = await response.json();
+    const result = (await response.json()) as {
+      deleted?: string[];
+      detail?: string;
+    };
 
     if (!response.ok) {
       throw new Error(result.detail || "Failed to delete image");
     }
 
-    return result.deleted;
+    return result.deleted ?? [];
   },
 
-  async save(charPayload: any, statsPayload: any, id?: number) {
+  async save(
+    charPayload: CharacterPayload,
+    statsPayload: CharacterStatsPayload,
+    id?: number | null,
+  ): Promise<CharacterMutationResult> {
     const authHeaders = await getAuthHeaders();
+    const payload: CharacterWriteRequest = {
+      charPayload,
+      statsPayload,
+    };
 
-    if (!id) {
-      // NEW CHARACTER
-      const response = await fetch(`${API_BASE_URL}/characters`, {
-        method: "POST",
+    const response = await fetch(
+      !id ? `${API_BASE_URL}/characters` : `${API_BASE_URL}/characters/${id}`,
+      {
+        method: !id ? "POST" : "PUT",
         headers: {
           "Content-Type": "application/json",
           ...authHeaders,
         },
-        body: JSON.stringify({
-          charPayload,
-          statsPayload,
-        }),
-      });
+        body: JSON.stringify(payload),
+      },
+    );
 
-      const result = await response.json();
+    const result = (await response.json()) as {
+      detail?: string;
+      message?: string | null;
+    };
 
-      if (!response.ok) {
-        throw new Error(result.detail || "Failed to create character");
-      }
-
-      return { success: true, message: result.message ?? null, error: null };
-    } else {
-      const response = await fetch(`${API_BASE_URL}/characters/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders,
-        },
-        body: JSON.stringify({
-          charPayload,
-          statsPayload,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.detail || "Failed to update character");
-      }
-
-      return { success: true, message: result.message ?? null, error: null };
+    if (!response.ok) {
+      throw new Error(
+        result.detail || (!id ? "Failed to create character" : "Failed to update character"),
+      );
     }
+
+    return { success: true, message: result.message ?? null, error: null };
   },
 
-  async delete(id: number, slug: string) {
+  async delete(id: number, slug: string): Promise<CharacterMutationResult> {
     const authHeaders = await getAuthHeaders();
     const response = await fetch(
       `${API_BASE_URL}/characters/${id}?slug=${encodeURIComponent(slug)}`,
@@ -139,7 +150,10 @@ export const characterService = {
       },
     );
 
-    const result = await response.json();
+    const result = (await response.json()) as {
+      detail?: string;
+      message?: string | null;
+    };
 
     if (!response.ok) {
       throw new Error(result.detail || "Failed to delete character");

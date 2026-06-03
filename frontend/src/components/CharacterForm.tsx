@@ -10,9 +10,15 @@ import {
   faChevronDown,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
+import type {
+  Character,
+  CharacterFormExtraData,
+  CharacterLoreEntry,
+  CharacterMutationResult,
+} from "@/src/types/character";
 
 interface CharacterFormProps {
-  editingChar: any;
+  editingChar: Character | null;
   showAddForm: boolean;
   isSaving: boolean;
   mainFile: File | null;
@@ -24,24 +30,19 @@ interface CharacterFormProps {
   openExistingInCropper: (url: string, target: "main" | "icon") => void;
   clearImage: (type: "main" | "icon") => void;
   handleSave: (
-    e: React.FormEvent<HTMLFormElement>,
-    char: any,
-    main: File | null,
-    icon: File | null,
-    onSuccess: () => void,
-    extraData?: {
-      abilities: string;
-      relationships: string;
-      trivias: string;
-      labels: string[];
-      galleryFiles: File[];
+    params: {
+      formElement: HTMLFormElement;
+      editingChar: Character | null;
+      mainFile: File | null;
+      iconFile: File | null;
+      extraData: CharacterFormExtraData;
     },
-  ) => Promise<void> | void;
+  ) => Promise<CharacterMutationResult>;
   onClose: () => void;
 }
 
 //#region --- Helper Functions ---
-const stringifyLore = (items: { name: string; desc: string }[]) => {
+const stringifyLore = (items: CharacterLoreEntry[]) => {
   return items
     .map((item) => `<b>${item.name}:</b> ${item.desc}`)
     .join("<br><br>");
@@ -69,12 +70,8 @@ export const CharacterForm = ({
   const [showStageNav, setShowStageNav] = useState(false);
 
   // Lore Lists
-  const [abilities, setAbilities] = useState<{ name: string; desc: string }[]>(
-    [],
-  );
-  const [relationships, setRelationships] = useState<
-    { name: string; desc: string }[]
-  >([]);
+  const [abilities, setAbilities] = useState<CharacterLoreEntry[]>([]);
+  const [relationships, setRelationships] = useState<CharacterLoreEntry[]>([]);
   const [trivias, setTrivias] = useState<string[]>([]);
   const [labels, setLabels] = useState<string[]>(["BASE"]);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
@@ -123,8 +120,8 @@ export const CharacterForm = ({
   };
 
   const updateEntry = (
-    list: any[],
-    setList: Function,
+    list: CharacterLoreEntry[],
+    setList: React.Dispatch<React.SetStateAction<CharacterLoreEntry[]>>,
     index: number,
     field: "name" | "desc",
     value: string,
@@ -152,64 +149,58 @@ export const CharacterForm = ({
     if (editingChar) {
       // 1. Parse Abilities
       if (editingChar.abilities) {
-        const parts = decodeHTML(editingChar.abilities)
+        const parsed = decodeHTML(editingChar.abilities)
           .split("<br><br>")
-          .filter((p: string) => p.trim() !== "");
-
-        const parsed = parts
-          .map((p: string) => {
-            // 1. Remove the bold tags to get "Name: Description"
-            const cleanPart = p
+          .map((part) => part.trim())
+          .filter((part) => part !== "")
+          .flatMap((part) => {
+            const cleanPart = part
               .replace(/<\/?b>/gi, "")
               .replace(/<\/?strong>/gi, "");
-
-            // 2. Find the first colon
             const colonIndex = cleanPart.indexOf(":");
 
-            if (colonIndex !== -1) {
-              return {
-                name: cleanPart.substring(0, colonIndex).trim(),
-                desc: cleanPart.substring(colonIndex + 1).trim(),
-              };
+            if (colonIndex === -1) {
+              console.warn("Manual Parse failed for part:", part);
+              return [];
             }
 
-            console.warn("Manual Parse failed for part:", p);
-            return null;
-          })
-          .filter(Boolean);
+            return [
+              {
+                name: cleanPart.substring(0, colonIndex).trim(),
+                desc: cleanPart.substring(colonIndex + 1).trim(),
+              },
+            ];
+          });
 
-        setAbilities(parsed as any);
+        setAbilities(parsed);
       }
 
       // 2. Parse Relationships
       if (editingChar.relationships) {
-        const parts = decodeHTML(editingChar.relationships)
+        const parsed = decodeHTML(editingChar.relationships)
           .split("<br><br>")
-          .filter((p: string) => p.trim() !== "");
-
-        const parsed = parts
-          .map((p: string) => {
-            // 1. Remove the bold tags to get "Name: Description"
-            const cleanPart = p
+          .map((part) => part.trim())
+          .filter((part) => part !== "")
+          .flatMap((part) => {
+            const cleanPart = part
               .replace(/<\/?b>/gi, "")
               .replace(/<\/?strong>/gi, "");
-
-            // 2. Find the first colon
             const colonIndex = cleanPart.indexOf(":");
 
-            if (colonIndex !== -1) {
-              return {
-                name: cleanPart.substring(0, colonIndex).trim(),
-                desc: cleanPart.substring(colonIndex + 1).trim(),
-              };
+            if (colonIndex === -1) {
+              console.warn("Manual Parse failed for part:", part);
+              return [];
             }
 
-            console.warn("Manual Parse failed for part:", p);
-            return null;
-          })
-          .filter(Boolean);
+            return [
+              {
+                name: cleanPart.substring(0, colonIndex).trim(),
+                desc: cleanPart.substring(colonIndex + 1).trim(),
+              },
+            ];
+          });
 
-        setRelationships(parsed as any);
+        setRelationships(parsed);
       }
 
       // 3. Parse Trivias (Handles the bullet points)
@@ -229,20 +220,28 @@ export const CharacterForm = ({
   }, [editingChar, showAddForm]);
   //#endregion
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Prepare the formatted data for the database
-    const extraData = {
+    const extraData: CharacterFormExtraData = {
       abilities: stringifyLore(abilities),
       relationships: stringifyLore(relationships),
       trivias: stringifyTrivia(trivias),
-      labels: labels,
-      galleryFiles: galleryFiles,
-      existingGalleryUrls: currentGalleryUrls,
+      labels,
+      galleryFiles,
     };
 
-    handleSave(e, editingChar, mainFile, iconFile, onClose, extraData);
+    const result = await handleSave({
+      formElement: e.currentTarget,
+      editingChar,
+      mainFile,
+      iconFile,
+      extraData,
+    });
+
+    if (result.success) {
+      onClose();
+    }
   };
 
   return (
@@ -451,7 +450,7 @@ export const CharacterForm = ({
                     <label className={styles.fieldLabel}>SUBJECT NAME</label>
                     <input
                       name="name"
-                      defaultValue={editingChar?.name}
+                      defaultValue={editingChar?.name ?? ""}
                       className={styles.inputField}
                       required
                     />
@@ -477,7 +476,7 @@ export const CharacterForm = ({
                 <label className={styles.fieldLabel}>DESIGNATED QUOTE</label>
                 <textarea
                   name="quote"
-                  defaultValue={editingChar?.quote}
+                  defaultValue={editingChar?.quote ?? ""}
                   className={styles.inputField}
                   rows={2}
                 />
@@ -505,7 +504,7 @@ export const CharacterForm = ({
                       <label className={styles.fieldLabel}>SPECIES</label>
                       <input
                         name="species"
-                        defaultValue={editingChar?.stats?.[0]?.species}
+                        defaultValue={editingChar?.stats?.[0]?.species ?? ""}
                         className={styles.inputField}
                       />
                     </div>
@@ -513,7 +512,7 @@ export const CharacterForm = ({
                       <label className={styles.fieldLabel}>AGE</label>
                       <input
                         name="age"
-                        defaultValue={editingChar?.stats?.[0]?.age}
+                        defaultValue={editingChar?.stats?.[0]?.age ?? ""}
                         className={styles.inputField}
                       />
                     </div>
@@ -618,7 +617,7 @@ export const CharacterForm = ({
                   <label className={styles.fieldLabel}>SUBJECT BIOGRAPHY</label>
                   <textarea
                     name="bio"
-                    defaultValue={editingChar?.bio}
+                    defaultValue={editingChar?.bio ?? ""}
                     className={styles.inputField}
                     rows={4}
                   />

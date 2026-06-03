@@ -11,18 +11,20 @@ import {
 } from "@/src/constants/character";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { Character, CharacterStatRecord } from "@/src/types/character";
 
 export default function CharacterProfile() {
   const params = useParams();
   const router = useRouter();
-  const [character, setCharacter] = useState<any>(null);
+  const [character, setCharacter] = useState<Character | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { charList, loading: charLoading } = useCharacters();
 
   useEffect(() => {
     if (charList.length > 0 && params.slug) {
-      const found = charList.find((c) => c.slug === params.slug);
+      const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+      const found = charList.find((c) => c.slug === slug);
       if (found) {
         setCharacter(found);
         setNotFound(false);
@@ -34,7 +36,7 @@ export default function CharacterProfile() {
 
   const renderHTML = (content: string) => ({ __html: content || "" });
 
-  const formatBirthday = (dateString: string) => {
+  const formatBirthday = (dateString?: string | null) => {
     if (!dateString || dateString === "0000-00-00") return "UNKNOWN";
     const [, monthStr, dayStr] = dateString.split("-");
     const months = [
@@ -77,7 +79,11 @@ export default function CharacterProfile() {
     );
   }
 
-  const charStats = character?.stats?.[0] || {};
+  if (!character) {
+    return null;
+  }
+
+  const charStats: CharacterStatRecord = character?.stats?.[0] || {};
 
   // Determine available pages
   const pages = [
@@ -152,13 +158,13 @@ export default function CharacterProfile() {
                     <div className={styles.statRow}>
                       <span className={styles.statLabel}>STATUS</span>
                       <span className={styles.statValue}>
-                        {STATUS_MAP[charStats.status] || "UNKNOWN"}
+                        {STATUS_MAP[charStats.status ?? 0] || "UNKNOWN"}
                       </span>
                     </div>
                     <div className={styles.statRow}>
                       <span className={styles.statLabel}>GENDER</span>
                       <span className={styles.statValue}>
-                        {GENDER_MAP[charStats.gender] || "UNKNOWN"}
+                        {GENDER_MAP[charStats.gender ?? 0] || "UNKNOWN"}
                       </span>
                     </div>
                     <div className={styles.statRow}>

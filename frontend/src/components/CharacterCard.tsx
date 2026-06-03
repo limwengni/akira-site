@@ -4,11 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { getRoleLabel } from "../constants/character";
 import styles from "../../app/index.module.css";
+import type { Character } from "@/src/types/character";
 
 interface CharacterCardProps {
-  char: any;
+  char: Character;
   isLoggedIn: boolean;
-  onEdit: (char: any) => void;
+  onEdit: (char: Character) => void;
   onDelete: (id: number, slug: string, name: string) => void;
 }
 
@@ -18,6 +19,7 @@ export const CharacterCard = ({
   onEdit,
   onDelete,
 }: CharacterCardProps) => {
+  const imageUrl = char.image_url || char.icon_url || "/placeholder-bg.png";
   const roleLabel = getRoleLabel(char.role);
   const roleClassName =
     roleLabel === "Protagonist"
@@ -49,7 +51,7 @@ export const CharacterCard = ({
 
         <Link href={`/characters/${char.slug}`} className={styles.characterCardLink}>
           <Image
-            src={`${char.image_url}?width=600&height=800&resize=cover`}
+            src={`${imageUrl}?width=600&height=800&resize=cover`}
             alt={char.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

@@ -10,8 +10,10 @@ import Cropper from "react-easy-crop";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCharacters } from "@/src/hooks/useCharacters";
 import { useImageCrop } from "@/src/hooks/useImageCrop";
+import { useStatusMessage } from "@/src/hooks/useStatusMessage";
 
 import { CharacterCard, CharacterCardSkeleton } from "@/src/components/CharacterCard";
+import { StatusMessage } from "@/src/components/StatusMessage";
 
 import { getRoleLabel, ROLE_MAP } from "@/src/constants/character";
 import {
@@ -25,6 +27,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CharacterForm } from "@/src/components/CharacterForm";
+import type { Character } from "@/src/types/character";
 // #endregion
 
 export default function Characters() {
@@ -59,7 +62,7 @@ export default function Characters() {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingChar, setEditingChar] = useState<any>(null);
+  const [editingChar, setEditingChar] = useState<Character | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [charPendingDelete, setCharPendingDelete] = useState<{
     id: number;
@@ -70,6 +73,7 @@ export default function Characters() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
+  const { status, showStatus, clearStatus } = useStatusMessage();
 
   //#endregion
 
@@ -117,7 +121,7 @@ export default function Characters() {
       setCharPendingDelete(null);
       setDeleteError("");
       if (result.message) {
-        alert(result.message);
+        showStatus(result.message, "success");
       }
       return;
     }
@@ -131,6 +135,22 @@ export default function Characters() {
   const availableRoles = Object.entries(ROLE_MAP).filter(([roleNum]) =>
     charList.some((char) => char.role === Number(roleNum)),
   );
+
+  const handleFormSave = async (params: Parameters<typeof handleSave>[0]) => {
+    const result = await handleSave(params);
+
+    if (result.success) {
+      showStatus(result.message ?? "Character saved successfully.", "success");
+      setEditingChar(null);
+      setShowAddForm(false);
+      setIconFile(null);
+      setMainFile(null);
+      return result;
+    }
+
+    showStatus(result.error ?? "Save failed. Please try again.", "error");
+    return result;
+  };
 
   const filteredCharacters = charList.filter((char) => {
     const matchesSearch = char.name
@@ -247,6 +267,14 @@ export default function Characters() {
 
   return (
     <>
+      {status && (
+        <StatusMessage
+          message={status.message}
+          tone={status.tone}
+          floating
+          onDismiss={clearStatus}
+        />
+      )}
       <section className={styles.mainContent}>
         <div className={`${styles.pagePanel} ${styles.characterListingPanel}`}>
           {/* Page Header */}
@@ -526,7 +554,7 @@ export default function Characters() {
           onFileSelect={onFileSelect}
           openExistingInCropper={openExistingInCropper}
           clearImage={clearImage}
-          handleSave={handleSave}
+          handleSave={handleFormSave}
           onClose={() => {
             setEditingChar(null);
             setShowAddForm(false);
