@@ -3,7 +3,7 @@
 This repo is now split into two app folders:
 
 - `frontend/`: the existing Next.js site for Vercel
-- `backend/`: a new FastAPI scaffold for Render
+- `backend/`: a FastAPI backend deployed as a separate Vercel project
 
 ## Local commands
 
@@ -22,18 +22,9 @@ npm run dev
 
 ## Deploy targets
 
-- Vercel should use `frontend/` as the Root Directory
-- Render should use `backend/` as the service root
+- Frontend Vercel project should use `frontend/` as the Root Directory
+- Backend Vercel project should use `backend/` as its project root
 
-## Migration rule of thumb
+## Future deployment notes
 
-Keep these in the frontend for now:
-
-- Supabase browser login/session handling
-- public reads that are safe with the anon key
-
-Move these into the backend next:
-
-- create/update/delete character endpoints
-- storage uploads and deletes
-- future voting logic and protected mutations
+- Future backend work can include voting logic
