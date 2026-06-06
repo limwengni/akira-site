@@ -490,7 +490,7 @@ export const CharacterForm = ({
                       <label className={styles.fieldLabel}>GENDER</label>
                       <select
                         name="gender"
-                        defaultValue={editingChar?.stats?.[0]?.gender ?? "0"}
+                        defaultValue={editingChar?.stats?.gender ?? "0"}
                         className={styles.inputField}
                       >
                         {Object.entries(GENDER_MAP).map(([value, label]) => (
@@ -504,7 +504,7 @@ export const CharacterForm = ({
                       <label className={styles.fieldLabel}>SPECIES</label>
                       <input
                         name="species"
-                        defaultValue={editingChar?.stats?.[0]?.species ?? ""}
+                        defaultValue={editingChar?.stats?.species ?? ""}
                         className={styles.inputField}
                       />
                     </div>
@@ -512,7 +512,7 @@ export const CharacterForm = ({
                       <label className={styles.fieldLabel}>AGE</label>
                       <input
                         name="age"
-                        defaultValue={editingChar?.stats?.[0]?.age ?? ""}
+                        defaultValue={editingChar?.stats?.age ?? ""}
                         className={styles.inputField}
                       />
                     </div>
@@ -521,7 +521,7 @@ export const CharacterForm = ({
                       <input
                         type="number"
                         name="height"
-                        defaultValue={editingChar?.stats?.[0]?.height
+                        defaultValue={editingChar?.stats?.height
                           ?.toString()
                           .replace(/\D/g, "")}
                         placeholder="e.g. 175"
@@ -531,7 +531,7 @@ export const CharacterForm = ({
                     <div>
                       {/* BIRTHDAY LOGIC */}
                       {(() => {
-                        const bday = editingChar?.stats?.[0]?.birthday; // e.g., "2000-12-21"
+                        const bday = editingChar?.stats?.birthday; // e.g., "2000-12-21"
                         const [_, month, day] = bday
                           ? bday.split("-")
                           : ["", "01", "01"];
@@ -592,7 +592,7 @@ export const CharacterForm = ({
                       <label className={styles.fieldLabel}>VITAL STATUS</label>
                       <select
                         name="status"
-                        defaultValue={editingChar?.stats?.[0]?.status ?? "1"}
+                        defaultValue={editingChar?.stats?.status ?? "1"}
                         className={styles.inputField}
                       >
                         {Object.entries(STATUS_MAP).map(([value, label]) => (

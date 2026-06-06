@@ -83,7 +83,7 @@ export default function CharacterProfile() {
     return null;
   }
 
-  const charStats: CharacterStatRecord = character?.stats?.[0] || {};
+  const charStats: CharacterStatRecord = character.stats || {};
 
   // Determine available pages
   const pages = [

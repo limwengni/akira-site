@@ -24,7 +24,7 @@ export interface Character {
   image_url?: string | null;
   icon_url?: string | null;
   gallery?: string[] | null;
-  stats?: CharacterStatRecord[];
+  stats?: CharacterStatRecord | null;
 }
 
 export interface CharacterLoreEntry {
