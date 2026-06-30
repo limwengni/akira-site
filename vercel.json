@@ -1,18 +1,30 @@
 {
-  "version": 2,
-  "builds": [
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "backend",
+      "entrypoint": "index.py"
+    }
+  },
+  "rewrites": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/next"
+      "source": "/characters(.*)",
+      "destination": { "type": "service", "service": "backend" }
     },
     {
-      "src": "api/index.py",
-      "use": "@vercel/python"
+      "source": "/storage(.*)",
+      "destination": { "type": "service", "service": "backend" }
+    },
+    {
+      "source": "/health",
+      "destination": { "type": "service", "service": "backend" }
+    },
+    {
+      "source": "/(.*)",
+      "destination": { "type": "service", "service": "frontend" }
     }
-  ],
-  "routes": [
-    { "src": "/characters(.*)", "dest": "/api/index" },
-    { "src": "/storage(.*)", "dest": "/api/index" },
-    { "src": "/health", "dest": "/api/index" }
   ]
 }
