@@ -11,15 +11,7 @@
   },
   "rewrites": [
     {
-      "source": "/characters(.*)",
-      "destination": { "type": "service", "service": "backend" }
-    },
-    {
-      "source": "/storage(.*)",
-      "destination": { "type": "service", "service": "backend" }
-    },
-    {
-      "source": "/health",
+      "source": "/api/(.*)",
       "destination": { "type": "service", "service": "backend" }
     },
     {

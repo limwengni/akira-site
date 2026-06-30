@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+import os
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
@@ -21,15 +23,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(characters_router)
-app.include_router(storage_router)
+API_PREFIX = os.getenv("API_PREFIX", "")
+
+app.include_router(characters_router, prefix=API_PREFIX)
+app.include_router(storage_router, prefix=API_PREFIX)
+
+router = APIRouter(prefix=API_PREFIX)
 
 
-@app.get("/")
+@router.get("/")
 def read_root() -> dict[str, str]:
     return {"message": "Akira Site API is running."}
 
 
-@app.get("/health")
+@router.get("/health")
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
+
+app.include_router(router)
